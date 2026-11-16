@@ -1,0 +1,27 @@
+name: emprestapp
+description: "EmprestApp: préstamo y alquiler de material universitario (práctica de Accesibilidad, Grupo D)"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.13.3
+
+# Solo lo que trae Flutter: no hay base de datos, servidor ni paquetes de
+# gestión de estado. Los datos son de prueba y están en memoria (lib/datos).
+dependencies:
+  flutter:
+    sdk: flutter
+  # Textos de los widgets estándar en español ("Atrás", "Cerrar"...), que es lo
+  # que lee TalkBack en los botones que no escribimos nosotros.
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

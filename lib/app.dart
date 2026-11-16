@@ -29,28 +29,21 @@ class _EmprestAppState extends State<EmprestApp> {
   Widget build(BuildContext context) {
     return DatosScope(
       datos: _datos,
-      child: ValueListenableBuilder<ThemeMode>(
-        valueListenable: _datos.modoTema,
-        builder: (context, modoTema, _) => MaterialApp(
-          title: 'EmprestApp',
-          debugShowCheckedModeBanner: false,
-          // Modo claro y modo oscuro (4.3). Se elige en Ajustes; por defecto,
-          // el que tenga puesto el móvil.
-          theme: TemaApp.claro(),
-          darkTheme: TemaApp.oscuro(),
-          themeMode: modoTema,
-          // En español, para que TalkBack lea "Atrás", "Cerrar"... en los
-          // botones estándar de Flutter.
-          locale: const Locale('es', 'ES'),
-          supportedLocales: const [Locale('es', 'ES')],
-          localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          // "¿Hay sesión guardada?" del mapa de navegación: sin sesión se
-          // empieza en la P1 y con sesión directamente en el menú (P2).
-          onGenerateInitialRoutes: (_) => [
-            Rutas.generar(RouteSettings(name: _datos.haySesion ? Rutas.menu : Rutas.acceso))!,
-          ],
-          onGenerateRoute: Rutas.generar,
-        ),
+      child: MaterialApp(
+        title: 'EmprestApp',
+        debugShowCheckedModeBanner: false,
+        theme: TemaApp.claro(),
+        // En español, para que TalkBack lea "Atrás", "Cerrar"... en los
+        // botones estándar de Flutter.
+        locale: const Locale('es', 'ES'),
+        supportedLocales: const [Locale('es', 'ES')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        // "¿Hay sesión guardada?" del mapa de navegación: sin sesión se empieza
+        // en la P1 y con sesión directamente en el menú (P2).
+        onGenerateInitialRoutes: (_) => [
+          Rutas.generar(RouteSettings(name: _datos.haySesion ? Rutas.menu : Rutas.acceso))!,
+        ],
+        onGenerateRoute: Rutas.generar,
       ),
     );
   }

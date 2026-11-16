@@ -23,11 +23,11 @@ class FotoMaterial extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          MarcoFoto(icono: foto.icono, alto: 180),
+          MarcoFoto(icono: foto.icono, alto: 176),
           const SizedBox(height: Espacio.s),
           Text(
             foto.descripcion,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Paleta.de(context).textoSecundario),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ColoresApp.textoSecundario),
           ),
         ],
       ),
@@ -35,10 +35,10 @@ class FotoMaterial extends StatelessWidget {
   }
 }
 
-/// Recuadro con un icono que hace de foto en esta versión sin imágenes.
-/// Es decorativo: quien lo usa decide qué tiene que leer TalkBack.
+/// Recuadro gris claro con un icono que hace de foto en esta versión sin
+/// imágenes. Es decorativo: quien lo usa decide qué tiene que leer TalkBack.
 class MarcoFoto extends StatelessWidget {
-  const MarcoFoto({super.key, required this.icono, this.alto = 180, this.ancho});
+  const MarcoFoto({super.key, required this.icono, this.alto = 176, this.ancho});
 
   final IconData icono;
   final double alto;
@@ -46,13 +46,12 @@ class MarcoFoto extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colores = Paleta.de(context);
     return ExcludeSemantics(
       child: Container(
         height: alto,
         width: ancho,
-        decoration: BoxDecoration(color: colores.separador, borderRadius: BorderRadius.circular(12)),
-        child: Icon(icono, size: alto * 0.4, color: colores.textoSecundario),
+        decoration: BoxDecoration(color: ColoresApp.separador, borderRadius: BorderRadius.circular(12)),
+        child: Icon(icono, size: alto * 0.4, color: ColoresApp.textoSecundario),
       ),
     );
   }

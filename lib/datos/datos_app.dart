@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter/widgets.dart';
 
 import 'datos_prueba.dart';
@@ -54,16 +53,6 @@ class DatosApp extends ChangeNotifier {
   // Ajustes (P10). Solo se guardan mientras la aplicación está abierta.
   bool avisosDeMensajes = true;
   bool avisosDeDevolucion = true;
-
-  /// Modo claro, oscuro o el que tenga puesto el móvil (4.3). Por defecto se
-  /// sigue al móvil.
-  final modoTema = ValueNotifier<ThemeMode>(ThemeMode.system);
-
-  @override
-  void dispose() {
-    modoTema.dispose();
-    super.dispose();
-  }
 
   void cambiarAvisos({bool? mensajes, bool? devolucion}) {
     avisosDeMensajes = mensajes ?? avisosDeMensajes;

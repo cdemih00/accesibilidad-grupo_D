@@ -26,20 +26,20 @@ class PantallaMenuPrincipal extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Inicio'),
         actions: [
-          // Ajustes (P10) con texto, no solo con el icono del engranaje (R3).
-          TextButton.icon(
+          // Ajustes (P10) con icono y texto, no solo con el engranaje (R3).
+          OutlinedButton.icon(
             onPressed: () => Navigator.pushNamed(context, Rutas.ajustes),
             icon: const Icon(Icons.settings_outlined),
             label: const Text('Ajustes'),
           ),
-          const SizedBox(width: Espacio.s),
+          const SizedBox(width: Espacio.m),
         ],
       ),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.inicio),
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
         children: [
-          Text('Hola, ${datos.nombre}', style: textos.headlineSmall),
+          Text('Hola, ${datos.nombre}', style: textos.titleMedium),
           const SizedBox(height: Espacio.m),
           // Barra de búsqueda arriba (walkthrough 3.6). Es un botón que abre la P3.
           OutlinedButton.icon(
@@ -47,7 +47,7 @@ class PantallaMenuPrincipal extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               alignment: AlignmentDirectional.centerStart,
               minimumSize: const Size.fromHeight(56),
-              padding: const EdgeInsets.symmetric(horizontal: Espacio.m, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: Espacio.m, vertical: Espacio.s),
             ),
             icon: const Icon(Icons.search),
             label: const Text('Buscar material'),
@@ -100,6 +100,7 @@ class _ResumenReserva extends StatelessWidget {
       alPulsar: () => Navigator.pushNamed(context, Rutas.misReservas),
       hijos: [
         Text(reserva.anuncio.nombre, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: Espacio.s),
         FilaDato('Devolución', reserva.devolucion),
       ],
     );
@@ -120,7 +121,7 @@ class _ResumenMiAnuncio extends StatelessWidget {
       alPulsar: () => Navigator.pushNamed(context, Rutas.misAnuncios),
       hijos: [
         Text(anuncio.nombre, style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: Espacio.xs),
+        const SizedBox(height: Espacio.s),
         EtiquetaEstado(estado: anuncio.estado),
       ],
     );

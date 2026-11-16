@@ -13,12 +13,15 @@ class PantallaAjustes extends StatelessWidget {
   const PantallaAjustes({super.key});
 
   Future<void> _cerrarSesion(BuildContext context) async {
+    // Cerrar sesión no borra nada, así que el botón de confirmar es el azul.
     final cerrar = await confirmarAccion(
       context,
       titulo: '¿Cerrar sesión?',
       mensaje: 'Para volver a entrar tendrás que escribir tu correo y tu contraseña.',
       textoConfirmar: 'Cerrar sesión',
-      textoCancelar: 'No, seguir dentro',
+      textoCancelar: 'Volver sin cerrar sesión',
+      icono: Icons.logout,
+      destructiva: false,
     );
     if (!cerrar || !context.mounted) return;
     DatosScope.of(context, escuchar: false).cerrarSesion();
@@ -61,30 +64,6 @@ class PantallaAjustes extends StatelessWidget {
             onChanged: (activado) => datos.cambiarAvisos(devolucion: activado),
           ),
           const Divider(),
-          const _Apartado('Apariencia'),
-          // Modo claro u oscuro (4.3). Se escucha el valor para que la opción
-          // marcada cambie aunque el tema se quede igual.
-          ValueListenableBuilder<ThemeMode>(
-            valueListenable: datos.modoTema,
-            builder: (context, modoTema, _) => RadioGroup<ThemeMode>(
-              groupValue: modoTema,
-              onChanged: (modo) {
-                if (modo != null) datos.modoTema.value = modo;
-              },
-              child: const Column(
-                children: [
-                  RadioListTile<ThemeMode>(
-                    value: ThemeMode.system,
-                    title: Text('Como en el móvil'),
-                    subtitle: Text('Claro u oscuro según los ajustes del móvil.'),
-                  ),
-                  RadioListTile<ThemeMode>(value: ThemeMode.light, title: Text('Modo claro')),
-                  RadioListTile<ThemeMode>(value: ThemeMode.dark, title: Text('Modo oscuro')),
-                ],
-              ),
-            ),
-          ),
-          const Divider(),
           const _Apartado('Accesibilidad'),
           const ListTile(
             leading: ExcludeSemantics(child: Icon(Icons.text_fields)),
@@ -98,7 +77,6 @@ class PantallaAjustes extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(Espacio.m),
             child: OutlinedButton.icon(
-              style: estiloBotonDestructivo(context),
               onPressed: () => _cerrarSesion(context),
               icon: const Icon(Icons.logout),
               label: const Text('Cerrar sesión'),

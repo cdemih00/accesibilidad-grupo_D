@@ -6,6 +6,17 @@ import '../navegacion/rutas.dart';
 import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
+import '../widgets/campo_texto.dart';
+
+/// Mensajes de error del apartado 4.4 para el correo (también los usa la
+/// pantalla de iniciar sesión).
+String? validarCorreoUniversidad(String? valor) {
+  if (valor == null || valor.trim().isEmpty) return 'Escribe tu correo de la universidad.';
+  if (!DatosApp.esCorreoDeLaUniversidad(valor)) {
+    return 'Ese correo no es de la universidad. Usa tu correo @estudiantes.unileon.es o @unileon.es.';
+  }
+  return null;
+}
 
 /// P1 · Crear cuenta (recorrido 1, RF1).
 ///
@@ -45,10 +56,7 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
 
   void _verificar() {
     if (_codigo.text.trim() != DatosApp.codigoDePrueba) {
-      setState(() {
-        _errorCodigo = 'El código no es correcto. Escribe los 6 números que te hemos enviado a '
-            '${_correo.text.trim()} o pide uno nuevo.';
-      });
+      setState(() => _errorCodigo = 'El código no es correcto. Revísalo o solicita uno nuevo.');
       return;
     }
     TextInput.finishAutofillContext();
@@ -69,7 +77,7 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
         body: SafeArea(
           child: AutofillGroup(
             child: ListView(
-              padding: const EdgeInsets.all(Espacio.l),
+              padding: const EdgeInsets.all(Espacio.m),
               children: _codigoEnviado ? _pasoCodigo(context) : _pasoDatos(context),
             ),
           ),
@@ -89,57 +97,47 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _correo,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              autofillHints: const [AutofillHints.email],
-              autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: 'Correo de la universidad',
-                hintText: 'nombre@estudiantes.unileon.es',
-                helperText: 'Tiene que terminar en @unileon.es o en @estudiantes.unileon.es.',
-              ),
-              validator: (valor) {
-                if (valor == null || valor.trim().isEmpty) return 'Escribe tu correo de la universidad.';
-                if (!DatosApp.esCorreoDeLaUniversidad(valor)) {
-                  return 'Tienes que usar tu correo de la universidad, que termina en @unileon.es '
-                      'o en @estudiantes.unileon.es.';
-                }
-                return null;
-              },
+            CampoTexto(
+              etiqueta: 'Correo de la universidad',
+              controlador: _correo,
+              pista: 'nombre@estudiantes.unileon.es',
+              ayuda: 'Tiene que terminar en @estudiantes.unileon.es o en @unileon.es.',
+              teclado: TextInputType.emailAddress,
+              accionTeclado: TextInputAction.next,
+              autorrelleno: const [AutofillHints.email],
+              autocorreccion: false,
+              validador: validarCorreoUniversidad,
             ),
             const SizedBox(height: Espacio.l),
-            TextFormField(
-              controller: _contrasena,
-              obscureText: !_verContrasena,
-              autofillHints: const [AutofillHints.newPassword],
-              onFieldSubmitted: (_) => _enviarCodigo(),
-              decoration: InputDecoration(
-                labelText: 'Contraseña',
-                helperText: 'Mínimo 8 caracteres.',
-                // Botón con texto en vez de un ojo suelto (R3).
-                suffixIcon: TextButton(
-                  onPressed: () => setState(() => _verContrasena = !_verContrasena),
-                  child: Text(
-                    _verContrasena ? 'Ocultar' : 'Mostrar',
-                    semanticsLabel: _verContrasena ? 'Ocultar la contraseña' : 'Mostrar la contraseña',
-                  ),
-                ),
-              ),
-              validator: (valor) => (valor == null || valor.length < 8)
+            CampoTexto(
+              etiqueta: 'Contraseña',
+              controlador: _contrasena,
+              ayuda: 'Mínimo 8 caracteres.',
+              oculto: !_verContrasena,
+              autorrelleno: const [AutofillHints.newPassword],
+              alEnviar: (_) => _enviarCodigo(),
+              validador: (valor) => (valor == null || valor.length < 8)
                   ? 'La contraseña tiene que tener al menos 8 caracteres.'
                   : null,
+            ),
+            CasillaVerContrasena(
+              valor: _verContrasena,
+              alCambiar: (valor) => setState(() => _verContrasena = valor),
             ),
           ],
         ),
       ),
-      const SizedBox(height: Espacio.xl),
-      FilledButton(onPressed: _enviarCodigo, child: const Text('Enviar código')),
+      const SizedBox(height: Espacio.l),
+      FilledButton.icon(
+        onPressed: _enviarCodigo,
+        icon: const Icon(Icons.mail_outline),
+        label: const Text('Enviar código'),
+      ),
       const SizedBox(height: Espacio.m),
-      TextButton(
+      OutlinedButton.icon(
         onPressed: () => Navigator.pushReplacementNamed(context, Rutas.iniciarSesion),
-        child: const Text('¿Ya tienes cuenta? Inicia sesión'),
+        icon: const Icon(Icons.login),
+        label: const Text('¿Ya tienes cuenta? Inicia sesión'),
       ),
     ];
   }
@@ -153,42 +151,66 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
       const SizedBox(height: Espacio.s),
       Text(
         'En esta versión de prueba el código es ${DatosApp.codigoDePrueba}.',
-        style: textos.bodyMedium?.copyWith(color: Paleta.de(context).textoSecundario),
+        style: textos.bodyMedium?.copyWith(color: ColoresApp.textoSecundario),
       ),
       const SizedBox(height: Espacio.l),
-      TextField(
-        controller: _codigo,
-        keyboardType: TextInputType.number,
+      CampoTexto(
+        etiqueta: 'Código de verificación',
+        controlador: _codigo,
+        pista: '6 números',
+        teclado: TextInputType.number,
         // Permite que el teclado proponga el código o pegarlo (RF1).
-        autofillHints: const [AutofillHints.oneTimeCode],
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
-        onChanged: (_) {
+        autorrelleno: const [AutofillHints.oneTimeCode],
+        formateadores: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(6)],
+        error: _errorCodigo,
+        alCambiar: (_) {
           if (_errorCodigo != null) setState(() => _errorCodigo = null);
         },
-        onSubmitted: (_) => _verificar(),
-        decoration: InputDecoration(
-          labelText: 'Código de verificación',
-          hintText: '6 números',
-          errorText: _errorCodigo,
-        ),
+        alEnviar: (_) => _verificar(),
       ),
-      const SizedBox(height: Espacio.xl),
-      FilledButton(onPressed: _verificar, child: const Text('Verificar y entrar')),
+      const SizedBox(height: Espacio.l),
+      FilledButton.icon(
+        onPressed: _verificar,
+        icon: const Icon(Icons.login),
+        label: const Text('Verificar y entrar'),
+      ),
       const SizedBox(height: Espacio.m),
       Wrap(
         spacing: Espacio.s,
         runSpacing: Espacio.s,
         children: [
-          OutlinedButton(
+          OutlinedButton.icon(
             onPressed: () => mostrarMensaje(context, 'Te hemos enviado un código nuevo a ${_correo.text.trim()}.'),
-            child: const Text('Pedir otro código'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Pedir otro código'),
           ),
-          TextButton(
+          OutlinedButton.icon(
             onPressed: () => setState(() => _codigoEnviado = false),
-            child: const Text('Cambiar el correo'),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Cambiar el correo'),
           ),
         ],
       ),
     ];
+  }
+}
+
+/// Casilla "Mostrar la contraseña" debajo del campo: una opción con texto, en
+/// vez de un ojo suelto dentro del campo (R3).
+class CasillaVerContrasena extends StatelessWidget {
+  const CasillaVerContrasena({super.key, required this.valor, required this.alCambiar});
+
+  final bool valor;
+  final ValueChanged<bool> alCambiar;
+
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      value: valor,
+      onChanged: (marcado) => alCambiar(marcado ?? false),
+      title: const Text('Mostrar la contraseña'),
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
+    );
   }
 }

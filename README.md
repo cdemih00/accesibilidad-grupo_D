@@ -2,7 +2,7 @@
 
 Proyecto Flutter de la práctica final de Accesibilidad (Grupo D). EmprestApp es una aplicación para prestar, alquilar o regalar material universitario entre estudiantes del campus.
 
-Este proyecto es el punto 6 de la semana 4: el proyecto creado, con el tema (modo claro y modo oscuro) y la estructura de navegación.
+Este proyecto es el punto 6 de la semana 4: el proyecto creado, con el tema (el sistema visual del apartado 4.1 de la memoria) y la estructura de navegación.
 
 La aplicación no tiene base de datos ni servidor. Los datos son de prueba y están en memoria, así que al cerrarla todo vuelve a como estaba. Lo que sí está hecho son las diez pantallas del inventario de la semana 3, la navegación del mapa (3.2) y los tres recorridos críticos funcionando de forma simulada, pensando sobre todo en la accesibilidad.
 
@@ -15,32 +15,51 @@ flutter run
 
 - **Iniciar sesión:** vale cualquier correo que termine en `@unileon.es` o `@estudiantes.unileon.es`, con cualquier contraseña.
 - **Crear cuenta:** el código de verificación es `123456`, el mismo que en el prototipo de la semana 3.
-- **Modo claro u oscuro:** se elige en Ajustes. Por defecto sigue el que tenga puesto el móvil.
-- **Pruebas automáticas:** `flutter test` lanza todas (contraste de las dos paletas, guías de accesibilidad en los dos modos, texto al 200 % y los tres recorridos).
+- **Pruebas automáticas:** `flutter test` lanza todas (contraste de la paleta, guías de accesibilidad de Flutter, texto al 200 % y los tres recorridos).
 
 ## Estructura
 
 ```
 lib/
   main.dart                 arranca la aplicación
-  app.dart                  MaterialApp: temas claro y oscuro, textos en español y rutas
+  app.dart                  MaterialApp: tema, textos en español y rutas
   tema/
-    colores.dart            paletas clara y oscura con los contrastes medidos
-    tema.dart               sistema visual: letra, botones de 48 dp, campos, estados...
+    colores.dart            paleta del 4.1 con los contrastes medidos (tabla del 4.2)
+    tema.dart               sistema visual del 4.1: letra, títulos, botones, campos, estados...
   navegacion/
     rutas.dart              una ruta por pantalla del inventario + irA() para volver al menú
   datos/
     modelos.dart            Anuncio, Reserva, Conversacion, Mensaje, BorradorAnuncio
-    datos_app.dart          estado en memoria (sesión, reservas, chats, anuncios, tema)
+    datos_app.dart          estado en memoria (sesión, reservas, chats, anuncios)
     datos_prueba.dart       datos inventados sacados de la memoria
   pantallas/                una pantalla por archivo, con el número del inventario
-  widgets/                  piezas que se repiten (barra de opciones, estado, fotos...)
+  widgets/                  piezas que se repiten (campo de texto, barra de opciones, estado...)
+assets/fuentes/             tipografía Lexend y su licencia (SIL Open Font License)
 test/
-  contraste_test.dart       contraste de las dos paletas (PASS/FAIL)
-  accesibilidad_test.dart   guías de accesibilidad de Flutter en cada pantalla y en los dos modos
+  contraste_test.dart       contraste de la paleta (PASS/FAIL)
+  accesibilidad_test.dart   guías de accesibilidad de Flutter en cada pantalla
   texto_grande_test.dart    todas las pantallas con la letra al 200 %
   recorridos_test.dart      los tres recorridos críticos de principio a fin
 ```
+
+## Sistema visual (apartado 4.1)
+
+- **Colores:** fondo blanco en todas las pantallas, azul `#1D4ED8` para las acciones principales (`#1E3A8A` mientras se pulsa), texto `#111827`, texto secundario `#475569`, bordes `#64748B`, error `#B91C1C` y éxito `#166534`.
+- **Tipografía:** Lexend, que no confunde letras como I y l. Texto de lectura y de los campos a 16 sp; etiquetas, ayudas, mensajes y barra de abajo a 14 sp. Crece con la letra del móvil hasta el 200 % y no se bloquea en ningún sitio.
+- **Títulos en negrita:** 28 sp para el nombre de la aplicación, 24 sp para el título de cada pantalla y 20 sp para las secciones y el nombre del material en su ficha.
+- **Espaciados:** múltiplos de 8 dp. 8 entre controles, 16 de márgenes y dentro de las tarjetas, y 24 entre bloques.
+- **Botones:** de 48 × 48 dp como mínimo y con icono al lado. Hay tres tipos:
+  - el principal, azul con texto blanco;
+  - el secundario, blanco con borde y texto azul;
+  - el de borrar, rojo con texto blanco, solo para cancelar una reserva, retirar un anuncio o borrar una foto, y siempre con confirmación.
+- **Botón deshabilitado:** blanco con texto y borde gris, y con una explicación al lado.
+- **Campos:** etiqueta fuera, encima, que se ve siempre; borde de 1 dp gris, de 2 dp azul al enfocarlos y de 2 dp rojo con un error. El error va debajo, en rojo y con icono.
+- **Estados:**
+  - "Disponible" en verde con ✓ y "Reservado" en gris con un reloj;
+  - filtros marcados con fondo azul claro, texto azul oscuro y ✓;
+  - en la barra de abajo, la opción actual va en azul, en negrita y con una raya encima;
+  - las confirmaciones salen en verde y en negrita.
+- **Diálogos de confirmación:** confirmar arriba (azul, o rojo si borra algo) y cancelar debajo como botón secundario. Los botones nombran la acción y la alternativa ("Retirar anuncio" / "Volver sin retirar").
 
 ## Pantallas y navegación
 
@@ -60,7 +79,7 @@ test/
 Cómo está montado el mapa de navegación:
 
 - **Entrada:** al abrir la aplicación se mira si hay sesión. Si no la hay se va a la P1 y, si la hay, al menú (P2).
-- **Barra de opciones:** abajo hay una barra con Inicio, Buscar, Publicar y Chats, siempre en el mismo sitio y con el texto debajo de cada icono. "Inicio" vuelve al menú desde cualquier pantalla principal (las marcas ↩ P2 del mapa).
+- **Barra de opciones:** abajo hay una barra con Inicio, Buscar, Publicar y Chats, siempre en el mismo sitio. "Inicio" vuelve al menú desde cualquier pantalla principal (las marcas ↩ P2 del mapa).
 - **Recorrido 2:** P3 → P4 → "Reservar" abre la P6 → "Confirmar reserva" abre el chat (P5). "Cancelar y volver" deja la ficha como estaba.
 - **Recorrido 3:** P7, que se rellena en tres pasos y se revisa antes de publicar → al publicar se va a Mis anuncios (P9).
 - **Salida:** "Cerrar sesión" en Ajustes pide confirmación y vuelve a la P1.
@@ -82,97 +101,56 @@ Cómo está montado el mapa de navegación:
 | RNF1 Contraste | `tema/colores.dart` + `test/contraste_test.dart` + guía `textContrastGuideline` |
 | RNF2 Letra mínima de 14 sp y texto al 200 % | `tema/tema.dart` (no se bloquea el escalado) + `test/texto_grande_test.dart` |
 | RNF3 Botones de 48 × 48 y 8 dp de separación | `tema/tema.dart` + guías `androidTapTargetGuideline` e `iOSTapTargetGuideline` |
-| RNF4 Etiquetas siempre visibles en los campos | `tema/tema.dart` (`FloatingLabelBehavior.always`) |
-| RNF5 Mismos nombres en todas las pantallas | `widgets/etiqueta_estado.dart`, `Anuncio.precioTexto`, "Reservar" y "Publicar material" en todas partes |
-| RNF6 Errores que explican qué falla, junto al campo y leídos por TalkBack | validadores de los formularios + `widgets/aviso.dart` |
+| RNF4 Etiquetas siempre visibles en los campos | `widgets/campo_texto.dart` (etiqueta fuera, encima) |
+| RNF5 Mismos nombres en todas las pantallas | "Reservar", "Publicar material", "Inicio", "Disponible" y "Reservado" en todas partes |
+| RNF6 Errores que explican qué falla, junto al campo y leídos por TalkBack | `widgets/campo_texto.dart` (`MensajeError`) + `widgets/aviso.dart` |
 | RNF7 No perder lo escrito | los formularios mantienen los datos al fallar; publicar guarda un borrador |
 | RNF9 Nombre para TalkBack en controles y fotos | `widgets/foto_material.dart`, `semanticsLabel` en los botones + guía `labeledTapTargetGuideline` |
-| RNF10 Nada solo con color | estado con texto e icono (`etiqueta_estado.dart`), avisos con icono, chips con marca, interruptores con marca, botones de texto subrayados |
+| RNF10 Nada solo con color | estado con texto e icono (`etiqueta_estado.dart`), errores con icono, filtros con ✓, raya en la barra, interruptores con marca |
 | RNF11 Sin gestos obligatorios | sin deslizar para borrar ni carruseles; ordenar fotos con "Subir" y "Bajar" |
-| Modo oscuro (4.3) | `tema/colores.dart` (`Paleta.oscura`), `app.dart` y la opción en `p10_ajustes.dart` |
 
 Lo que está pensado para la accesibilidad en todas las pantallas:
 
 - **Widgets estándar de Flutter siempre que se puede.** Ya traen la semántica hecha.
-- **`Semantics` solo cuando hace falta:** tarjetas que se leen de una vez, fotos con su descripción, estado "Disponible/Reservado", títulos marcados como encabezado y avisos que TalkBack lee al aparecer.
-- **Sin botones de solo icono hechos por nosotros.** Todos llevan texto ("Ajustes", "Mostrar", "Borrar", "Enviar"...). Las únicas excepciones son la flecha de atrás y la X de cerrar del snackbar, que son estándar y TalkBack lee "Atrás" y "Cerrar" porque la aplicación está en español.
-- **Botones de texto subrayados.** Al revisar la interfaz en escala de grises, "Ver mis reservas" y los demás botones sin borde solo se distinguían del texto normal por el azul.
-- **Acciones que no se pueden deshacer:** van en rojo, con más separación respecto al resto de botones, y siempre piden confirmación.
-- **Modo claro y modo oscuro.** Los dos tienen todos los contrastes medidos y pasan las mismas pruebas.
+- **`Semantics` solo cuando hace falta:**
+  - la etiqueta y el campo de texto se leen juntos;
+  - las tarjetas se leen de una vez;
+  - las fotos, con su descripción;
+  - el estado "Disponible/Reservado";
+  - los títulos van marcados como encabezado;
+  - los errores y avisos los lee TalkBack al aparecer.
+- **Sin botones de solo icono.** Todos llevan texto. La única excepción es la flecha de atrás, que es la estándar y TalkBack lee "Atrás" porque la aplicación está en español. Para ver la contraseña hay una casilla "Mostrar la contraseña" en vez de un ojo dentro del campo.
+- **Mensajes de error del apartado 4.4:**
+  - "Ese correo no es de la universidad. Usa tu correo @estudiantes.unileon.es o @unileon.es."
+  - "El código no es correcto. Revísalo o solicita uno nuevo."
+  - "Añade una descripción de la foto para que otras personas puedan saber qué muestra."
 - **Datos inventados:** salen de la memoria (la cámara de Laura, los libros de Finanzas de María, la tableta de José...).
 
-## Tablas de contraste
+## Tabla de contrastes (apartado 4.2)
 
-Salen de `flutter test test/contraste_test.dart`, que las imprime. Mínimos: 4,5:1 para texto y 3:1 para componentes y estados. El modo claro usa los colores del apartado 4.1 con el fondo de las pantallas roto a `#F8FAFC`, y el modo oscuro los del 4.3.
-
-### Modo claro
+Sale de `flutter test test/contraste_test.dart`, que la imprime. Mínimos (RNF1): 4,5:1 para texto y 3:1 para bordes y elementos que hacen falta para reconocer un control o su estado.
 
 | Combinación | Colores | Ratio | Mínimo | Resultado |
 |---|---|---|---|---|
-| Texto principal sobre el fondo | #111827 / #F8FAFC | 16,96:1 | 4,5:1 | PASS |
-| Texto principal sobre tarjetas y campos | #111827 / #FFFFFF | 17,74:1 | 4,5:1 | PASS |
-| Texto secundario sobre el fondo | #475569 / #F8FAFC | 7,24:1 | 4,5:1 | PASS |
-| Texto secundario sobre tarjetas y campos | #475569 / #FFFFFF | 7,58:1 | 4,5:1 | PASS |
-| Texto del botón principal | #FFFFFF / #1D4ED8 | 6,70:1 | 4,5:1 | PASS |
-| Texto del botón principal pulsado | #FFFFFF / #1E3A8A | 10,36:1 | 4,5:1 | PASS |
-| Botones de texto sobre el fondo | #1D4ED8 / #F8FAFC | 6,41:1 | 4,5:1 | PASS |
-| Botones de texto sobre tarjetas | #1D4ED8 / #FFFFFF | 6,70:1 | 4,5:1 | PASS |
-| Opción marcada y mensajes propios | #1E3A8A / #DBEAFE | 8,49:1 | 4,5:1 | PASS |
-| Mensaje de error sobre el fondo | #B91C1C / #F8FAFC | 6,18:1 | 4,5:1 | PASS |
-| Mensaje de error sobre tarjetas y campos | #B91C1C / #FFFFFF | 6,47:1 | 4,5:1 | PASS |
-| Texto del botón de borrar o cancelar | #FFFFFF / #B91C1C | 6,47:1 | 4,5:1 | PASS |
-| Aviso de error | #7F1D1D / #FEE2E2 | 8,20:1 | 4,5:1 | PASS |
-| Mensaje de éxito sobre el fondo | #166534 / #F8FAFC | 6,81:1 | 4,5:1 | PASS |
-| Mensaje de éxito sobre tarjetas | #166534 / #FFFFFF | 7,13:1 | 4,5:1 | PASS |
-| Aviso de éxito y estado Disponible | #14532D / #DCFCE7 | 8,30:1 | 4,5:1 | PASS |
-| Estado Reservado | #78350F / #FEF3C7 | 8,15:1 | 4,5:1 | PASS |
-| Snackbar: texto | #F1F5F9 / #1E293B | 13,35:1 | 4,5:1 | PASS |
-| Snackbar: botón | #93C5FD / #1E293B | 8,11:1 | 4,5:1 | PASS |
-| Borde de campos, chips y tarjetas sobre el fondo | #64748B / #F8FAFC | 4,55:1 | 3:1 | PASS |
-| Borde de campos y chips sobre tarjetas | #64748B / #FFFFFF | 4,76:1 | 3:1 | PASS |
-| Botón principal sobre el fondo | #1D4ED8 / #F8FAFC | 6,41:1 | 3:1 | PASS |
-| Indicador de la barra de opciones | #1D4ED8 / #FFFFFF | 6,70:1 | 3:1 | PASS |
-| Icono de Disponible | #166534 / #DCFCE7 | 6,49:1 | 3:1 | PASS |
-| Icono de Reservado | #B45309 / #FEF3C7 | 4,51:1 | 3:1 | PASS |
-| Icono de error en los avisos | #B91C1C / #FEE2E2 | 5,30:1 | 3:1 | PASS |
-| Icono de las fotos de ejemplo | #475569 / #E2E8F0 | 6,15:1 | 3:1 | PASS |
-
-### Modo oscuro
-
-| Combinación | Colores | Ratio | Mínimo | Resultado |
-|---|---|---|---|---|
-| Texto principal sobre el fondo | #F1F5F9 / #0F172A | 16,30:1 | 4,5:1 | PASS |
-| Texto principal sobre tarjetas y campos | #F1F5F9 / #1E293B | 13,35:1 | 4,5:1 | PASS |
-| Texto secundario sobre el fondo | #CBD5E1 / #0F172A | 12,02:1 | 4,5:1 | PASS |
-| Texto secundario sobre tarjetas y campos | #CBD5E1 / #1E293B | 9,85:1 | 4,5:1 | PASS |
-| Texto del botón principal | #0F172A / #60A5FA | 7,02:1 | 4,5:1 | PASS |
-| Texto del botón principal pulsado | #0F172A / #93C5FD | 9,90:1 | 4,5:1 | PASS |
-| Botones de texto sobre el fondo | #60A5FA / #0F172A | 7,02:1 | 4,5:1 | PASS |
-| Botones de texto sobre tarjetas | #60A5FA / #1E293B | 5,75:1 | 4,5:1 | PASS |
-| Opción marcada y mensajes propios | #DBEAFE / #1E3A8A | 8,49:1 | 4,5:1 | PASS |
-| Mensaje de error sobre el fondo | #F87171 / #0F172A | 6,45:1 | 4,5:1 | PASS |
-| Mensaje de error sobre tarjetas y campos | #F87171 / #1E293B | 5,29:1 | 4,5:1 | PASS |
-| Texto del botón de borrar o cancelar | #0F172A / #F87171 | 6,45:1 | 4,5:1 | PASS |
-| Aviso de error | #FECACA / #450A0A | 11,16:1 | 4,5:1 | PASS |
-| Mensaje de éxito sobre el fondo | #4ADE80 / #0F172A | 10,25:1 | 4,5:1 | PASS |
-| Mensaje de éxito sobre tarjetas | #4ADE80 / #1E293B | 8,40:1 | 4,5:1 | PASS |
-| Aviso de éxito y estado Disponible | #BBF7D0 / #052E16 | 12,30:1 | 4,5:1 | PASS |
-| Estado Reservado | #FDE68A / #451A03 | 12,03:1 | 4,5:1 | PASS |
-| Snackbar: texto | #0F172A / #F1F5F9 | 16,30:1 | 4,5:1 | PASS |
-| Snackbar: botón | #1D4ED8 / #F1F5F9 | 6,12:1 | 4,5:1 | PASS |
-| Borde de campos, chips y tarjetas sobre el fondo | #94A3B8 / #0F172A | 6,96:1 | 3:1 | PASS |
-| Borde de campos y chips sobre tarjetas | #94A3B8 / #1E293B | 5,71:1 | 3:1 | PASS |
-| Botón principal sobre el fondo | #60A5FA / #0F172A | 7,02:1 | 3:1 | PASS |
-| Indicador de la barra de opciones | #60A5FA / #1E293B | 5,75:1 | 3:1 | PASS |
-| Icono de Disponible | #4ADE80 / #052E16 | 8,55:1 | 3:1 | PASS |
-| Icono de Reservado | #FBBF24 / #451A03 | 8,97:1 | 3:1 | PASS |
-| Icono de error en los avisos | #F87171 / #450A0A | 5,84:1 | 3:1 | PASS |
-| Icono de las fotos de ejemplo | #CBD5E1 / #334155 | 6,97:1 | 3:1 | PASS |
+| Texto principal #111827 sobre blanco | #111827 / #FFFFFF | 17,74:1 | 4,5:1 | PASS |
+| Texto secundario #475569 sobre blanco | #475569 / #FFFFFF | 7,58:1 | 4,5:1 | PASS |
+| Texto blanco sobre botón azul #1D4ED8 | #FFFFFF / #1D4ED8 | 6,70:1 | 4,5:1 | PASS |
+| Texto blanco sobre botón pulsado #1E3A8A | #FFFFFF / #1E3A8A | 10,36:1 | 4,5:1 | PASS |
+| Texto de error #B91C1C sobre blanco | #B91C1C / #FFFFFF | 6,47:1 | 4,5:1 | PASS |
+| Texto de éxito y "Disponible" #166534 sobre blanco | #166534 / #FFFFFF | 7,13:1 | 4,5:1 | PASS |
+| Texto azul y respuestas rápidas #1D4ED8 sobre blanco | #1D4ED8 / #FFFFFF | 6,70:1 | 4,5:1 | PASS |
+| Borde de campo #64748B sobre blanco | #64748B / #FFFFFF | 4,76:1 | 3:1 | PASS |
+| Borde de foco #1D4ED8 sobre blanco | #1D4ED8 / #FFFFFF | 6,70:1 | 3:1 | PASS |
+| Texto blanco sobre botón rojo #B91C1C | #FFFFFF / #B91C1C | 6,47:1 | 4,5:1 | PASS |
+| Texto del filtro seleccionado #1E3A8A sobre #DBEAFE | #1E3A8A / #DBEAFE | 8,49:1 | 4,5:1 | PASS |
+| Texto y borde de controles deshabilitados #64748B sobre blanco | #64748B / #FFFFFF | 4,76:1 | 4,5:1 | PASS |
+| Estado "Reservado" #475569 sobre blanco | #475569 / #FFFFFF | 7,58:1 | 4,5:1 | PASS |
+| Icono de las fotos de ejemplo #475569 sobre #E2E8F0 | #475569 / #E2E8F0 | 6,15:1 | 3:1 | PASS |
 
 Si cambiáis algún color, solo hay que tocar `lib/tema/colores.dart` y volver a pasar el test.
 
 ## Notas
 
-- **Las etiquetas de la barra de opciones y el título de arriba solo crecen hasta 1,3 veces** con la letra al 200 %. No lo hemos puesto nosotros: es como vienen esos componentes en Flutter. TalkBack lee igualmente el nombre completo y en la barra se ve en grande con una pulsación larga. Todo lo demás crece entero.
+- **El título de arriba solo crece hasta 1,3 veces** con la letra al 200 %. Es como viene ese componente en Flutter. En la barra de abajo, si con la letra muy grande una palabra no cabe en su hueco, se reduce en vez de cortarse. TalkBack lee el nombre completo en los dos casos. Todo lo demás crece entero.
 - **Simulado:** la cámara, el envío del código y que la sesión y los ajustes se queden guardados. Si hiciera falta que lo escrito sobreviva a que Android cierre la aplicación (RNF7), se puede usar la restauración de estado de Flutter, sin base de datos.
 - **Pendiente para la semana 5:** la prueba con TalkBack en un móvil real y las capturas con la letra grande en el emulador.

@@ -6,9 +6,9 @@ import '../tema/tema.dart';
 
 /// P1 · Inicio de sesión y registro: pantalla de bienvenida (recorrido 1).
 ///
-/// "Crear cuenta" destaca más que "Iniciar sesión": en la prueba de primer
-/// clic (3.5) una persona dudó porque los dos tenían la misma importancia.
-/// Los botones van abajo, donde llega el pulgar (R5).
+/// "Crear cuenta" es el botón principal e "Iniciar sesión" el secundario: en
+/// la prueba de primer clic (3.5) una persona dudó porque los dos tenían la
+/// misma importancia. Los botones van abajo, donde llega el pulgar (R5).
 class PantallaAcceso extends StatelessWidget {
   const PantallaAcceso({super.key});
 
@@ -20,18 +20,18 @@ class PantallaAcceso extends StatelessWidget {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, limites) => SingleChildScrollView(
-            padding: const EdgeInsets.all(Espacio.l),
+            padding: const EdgeInsets.all(Espacio.m),
             child: ConstrainedBox(
               // Ocupa toda la pantalla para dejar los botones abajo, pero si el
               // texto es muy grande se puede desplazar.
-              constraints: BoxConstraints(minHeight: limites.maxHeight - 2 * Espacio.l),
+              constraints: BoxConstraints(minHeight: limites.maxHeight - 2 * Espacio.m),
               child: IntrinsicHeight(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: Espacio.xl),
-                    ExcludeSemantics(
-                      child: Icon(Icons.volunteer_activism_outlined, size: 72, color: Paleta.de(context).primario),
+                    const ExcludeSemantics(
+                      child: Icon(Icons.volunteer_activism_outlined, size: 72, color: ColoresApp.azul),
                     ),
                     const SizedBox(height: Espacio.m),
                     Semantics(
@@ -46,20 +46,22 @@ class PantallaAcceso extends StatelessWidget {
                     ),
                     const Spacer(),
                     const SizedBox(height: Espacio.xl),
-                    FilledButton(
+                    FilledButton.icon(
                       onPressed: () => Navigator.pushNamed(context, Rutas.crearCuenta),
-                      child: const Text('Crear cuenta'),
+                      icon: const Icon(Icons.person_add_alt_1),
+                      label: const Text('Crear cuenta'),
                     ),
                     const SizedBox(height: Espacio.m),
-                    OutlinedButton(
+                    OutlinedButton.icon(
                       onPressed: () => Navigator.pushNamed(context, Rutas.iniciarSesion),
-                      child: const Text('Iniciar sesión'),
+                      icon: const Icon(Icons.login),
+                      label: const Text('Iniciar sesión'),
                     ),
                     const SizedBox(height: Espacio.m),
                     Text(
                       'Para registrarte necesitas el correo de la Universidad de León.',
                       textAlign: TextAlign.center,
-                      style: textos.bodyMedium?.copyWith(color: Paleta.de(context).textoSecundario),
+                      style: textos.bodyMedium?.copyWith(color: ColoresApp.textoSecundario),
                     ),
                   ],
                 ),

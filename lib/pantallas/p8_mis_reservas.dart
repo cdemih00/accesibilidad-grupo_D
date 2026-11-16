@@ -31,6 +31,7 @@ class PantallaMisReservas extends StatelessWidget {
               icono: Icons.event_available_outlined,
               texto: 'No tienes ninguna reserva.',
               textoBoton: 'Buscar material',
+              iconoBoton: Icons.search,
               alPulsar: () => irA(context, Rutas.buscar),
             )
           else
@@ -56,8 +57,9 @@ class _TarjetaReserva extends StatelessWidget {
       context,
       titulo: '¿Cancelar la reserva?',
       mensaje: 'Vas a cancelar la reserva de "$nombre". El material volverá a estar disponible para otras personas.',
-      textoConfirmar: 'Sí, cancelar reserva',
-      textoCancelar: 'No, mantenerla',
+      textoConfirmar: 'Cancelar reserva',
+      textoCancelar: 'Volver sin cancelar',
+      icono: Icons.event_busy_outlined,
     );
     if (!cancelar || !context.mounted) return;
     DatosScope.of(context, escuchar: false).cancelarReserva(reserva);
@@ -72,6 +74,7 @@ class _TarjetaReserva extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final anuncio = reserva.anuncio;
+    final textos = Theme.of(context).textTheme;
 
     return Card(
       child: Padding(
@@ -79,30 +82,35 @@ class _TarjetaReserva extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(header: true, child: Text(anuncio.nombre, style: Theme.of(context).textTheme.titleMedium)),
+            Semantics(header: true, child: Text(anuncio.nombre, style: textos.titleSmall)),
             const SizedBox(height: Espacio.s),
             // Estado con icono y texto (RNF10).
             Row(
               children: [
-                Icon(Icons.check_circle, color: Paleta.de(context).exito, size: 20),
+                const Icon(Icons.check_circle_outline, color: ColoresApp.exito, size: 20),
                 const SizedBox(width: Espacio.s),
-                const Expanded(child: Text('Reserva confirmada', style: TextStyle(fontWeight: FontWeight.w700))),
+                Expanded(
+                  child: Text(
+                    'Reserva confirmada',
+                    style: textos.labelMedium?.copyWith(color: ColoresApp.exito, fontWeight: FontWeight.w700),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: Espacio.xs),
+            const SizedBox(height: Espacio.s),
             FilaDato('Fechas', anuncio.fechas),
             FilaDato('Devolución', reserva.devolucion),
             FilaDato('Dueño', anuncio.dueno),
             FilaDato('Entrega', anuncio.entrega),
-            const SizedBox(height: Espacio.m),
+            const SizedBox(height: Espacio.s),
             FilledButton.icon(
               onPressed: () => _abrirChat(context),
               icon: const Icon(Icons.chat_bubble_outline),
               label: const Text('Abrir chat'),
             ),
-            // Más separación con la acción destructiva para no pulsarla sin querer.
+            // Más separación con la acción de borrar para no pulsarla sin querer (4.4).
             const SizedBox(height: Espacio.l),
-            OutlinedButton.icon(
+            FilledButton.icon(
               style: estiloBotonDestructivo(context),
               onPressed: () => _cancelar(context),
               icon: const Icon(Icons.event_busy_outlined),

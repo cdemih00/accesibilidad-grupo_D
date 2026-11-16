@@ -25,3 +25,16 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Lexend (apartado 4.1): letras que no se confunden entre sí, como I y l.
+  # Licencia SIL Open Font License 1.1 (assets/fuentes/OFL.txt).
+  fonts:
+    - family: Lexend
+      fonts:
+        - asset: assets/fuentes/Lexend-Regular.ttf
+        - asset: assets/fuentes/Lexend-Medium.ttf
+          weight: 500
+        - asset: assets/fuentes/Lexend-SemiBold.ttf
+          weight: 600
+        - asset: assets/fuentes/Lexend-Bold.ttf
+          weight: 700

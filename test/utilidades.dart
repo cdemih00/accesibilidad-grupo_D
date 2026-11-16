@@ -12,6 +12,8 @@ import 'package:emprestapp/pantallas/p7_publicar_material.dart';
 import 'package:emprestapp/pantallas/p8_mis_reservas.dart';
 import 'package:emprestapp/pantallas/p9_mis_anuncios.dart';
 import 'package:emprestapp/tema/tema.dart';
+import 'package:emprestapp/widgets/barra_opciones.dart';
+import 'package:emprestapp/widgets/campo_texto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,13 +28,12 @@ void usarPantallaDeMovil(WidgetTester tester, {double alto = 780}) {
 DatosApp datosConSesion() => DatosApp()..iniciarSesion('prueba@estudiantes.unileon.es');
 
 /// Monta una pantalla suelta con el tema y el idioma de la aplicación.
-/// [escalaTexto] simula el tamaño de letra del móvil (2 = 200 %) y [oscuro]
-/// usa el modo oscuro.
-Widget appDePrueba(DatosApp datos, Widget pantalla, {double escalaTexto = 1, bool oscuro = false}) {
+/// [escalaTexto] simula el tamaño de letra del móvil (2 = 200 %).
+Widget appDePrueba(DatosApp datos, Widget pantalla, {double escalaTexto = 1}) {
   return DatosScope(
     datos: datos,
     child: MaterialApp(
-      theme: oscuro ? TemaApp.oscuro() : TemaApp.claro(),
+      theme: TemaApp.claro(),
       locale: const Locale('es', 'ES'),
       supportedLocales: const [Locale('es', 'ES')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
@@ -44,6 +45,19 @@ Widget appDePrueba(DatosApp datos, Widget pantalla, {double escalaTexto = 1, boo
     ),
   );
 }
+
+/// El botón (principal, secundario o de borrar) que tiene ese texto.
+Finder boton(String texto) => find.ancestor(of: find.text(texto), matching: find.bySubtype<ButtonStyleButton>());
+
+/// El botón con ese texto dentro del diálogo abierto.
+Finder botonDelDialogo(String texto) => find.descendant(of: find.byType(AlertDialog), matching: boton(texto));
+
+/// El campo de texto que tiene esa etiqueta encima.
+Finder campo(String etiqueta) =>
+    find.descendant(of: find.widgetWithText(CampoTexto, etiqueta), matching: find.byType(TextField));
+
+/// Una opción de la barra de abajo.
+Finder opcionDeLaBarra(String texto) => find.descendant(of: find.byType(BarraOpciones), matching: find.text(texto));
 
 /// Todas las pantallas del inventario (la P6 es un diálogo y se prueba aparte).
 final pantallasDeLaApp = <String, Widget Function(DatosApp datos)>{

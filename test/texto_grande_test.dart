@@ -26,10 +26,10 @@ void main() {
     await tester.pumpWidget(
       appDePrueba(datos, PantallaDetalleMaterial(anuncio: datos.catalogo.first), escalaTexto: 2),
     );
-    await tester.tap(find.widgetWithText(FilledButton, 'Reservar'));
+    await tester.tap(boton('Reservar'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(find.text('Confirmar reserva'), findsOneWidget);
+    expect(botonDelDialogo('Confirmar reserva'), findsOneWidget);
   });
 }
 

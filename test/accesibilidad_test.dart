@@ -7,65 +7,62 @@ import 'package:flutter_test/flutter_test.dart';
 import 'utilidades.dart';
 
 /// Pasa las guías de accesibilidad de Flutter (Accessibility Guideline API)
-/// por todas las pantallas, en modo claro y en modo oscuro. Es el método de
-/// prueba de RNF1, RNF3 y RNF9.
+/// por todas las pantallas. Es el método de prueba de RNF1, RNF3 y RNF9.
 void main() {
-  for (final oscuro in [false, true]) {
-    final modo = oscuro ? 'modo oscuro' : 'modo claro';
-
-    for (final MapEntry(key: nombre, value: crearPantalla) in pantallasDeLaApp.entries) {
-      testWidgets('$nombre cumple las guías de accesibilidad ($modo)', (tester) async {
-        usarPantallaDeMovil(tester);
-        final semantica = tester.ensureSemantics();
-        final datos = datosConSesion();
-        await tester.pumpWidget(appDePrueba(datos, crearPantalla(datos), oscuro: oscuro));
-        await tester.pumpAndSettle();
-
-        await comprobarGuias(tester);
-        semantica.dispose();
-      });
-    }
-
-    testWidgets('P3 · Filtros abiertos y uno marcado cumplen las guías de accesibilidad ($modo)', (tester) async {
-      usarPantallaDeMovil(tester);
-      final semantica = tester.ensureSemantics();
-      await tester.pumpWidget(appDePrueba(datosConSesion(), const PantallaBuscarMaterial(), oscuro: oscuro));
-      await tester.tap(find.text('Filtros'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilterChip, 'Préstamo gratuito'));
-      await tester.pumpAndSettle();
-
-      await comprobarGuias(tester);
-      semantica.dispose();
-    });
-
-    testWidgets('P7 · Paso de fotos con una foto añadida cumple las guías de accesibilidad ($modo)', (tester) async {
-      usarPantallaDeMovil(tester);
-      final semantica = tester.ensureSemantics();
-      await tester.pumpWidget(appDePrueba(datosConSesion(), const PantallaPublicarMaterial(), oscuro: oscuro));
-      await tester.tap(find.text('Hacer foto'));
-      await tester.pumpAndSettle();
-      expect(find.text('Foto 1'), findsOneWidget);
-
-      await comprobarGuias(tester);
-      semantica.dispose();
-    });
-
-    testWidgets('P6 · Confirmación de reserva cumple las guías de accesibilidad ($modo)', (tester) async {
+  for (final MapEntry(key: nombre, value: crearPantalla) in pantallasDeLaApp.entries) {
+    testWidgets('$nombre cumple las guías de accesibilidad', (tester) async {
       usarPantallaDeMovil(tester);
       final semantica = tester.ensureSemantics();
       final datos = datosConSesion();
-      await tester.pumpWidget(
-        appDePrueba(datos, PantallaDetalleMaterial(anuncio: datos.catalogo.first), oscuro: oscuro),
-      );
-      await tester.tap(find.widgetWithText(FilledButton, 'Reservar'));
+      await tester.pumpWidget(appDePrueba(datos, crearPantalla(datos)));
       await tester.pumpAndSettle();
-      expect(find.text('¿Confirmas la reserva?'), findsOneWidget);
 
       await comprobarGuias(tester);
       semantica.dispose();
     });
   }
+
+  testWidgets('P3 · Filtros abiertos y uno marcado cumplen las guías de accesibilidad', (tester) async {
+    usarPantallaDeMovil(tester);
+    final semantica = tester.ensureSemantics();
+    await tester.pumpWidget(appDePrueba(datosConSesion(), const PantallaBuscarMaterial()));
+    await tester.tap(find.text('Filtros'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(FilterChip, 'Préstamo gratuito'));
+    await tester.pumpAndSettle();
+
+    await comprobarGuias(tester);
+    semantica.dispose();
+  });
+
+  testWidgets('P7 · Paso de fotos con dos fotos añadidas cumple las guías de accesibilidad', (tester) async {
+    usarPantallaDeMovil(tester);
+    final semantica = tester.ensureSemantics();
+    await tester.pumpWidget(appDePrueba(datosConSesion(), const PantallaPublicarMaterial()));
+    await tester.tap(boton('Hacer foto'));
+    await tester.pumpAndSettle();
+    // Con una foto puesta, el botón queda más abajo: se baja hasta él.
+    await tester.scrollUntilVisible(find.text('Elegir de la galería'), 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(boton('Elegir de la galería'));
+    await tester.pumpAndSettle();
+    expect(find.text('Foto 2'), findsOneWidget);
+
+    await comprobarGuias(tester);
+    semantica.dispose();
+  });
+
+  testWidgets('P6 · Confirmación de reserva cumple las guías de accesibilidad', (tester) async {
+    usarPantallaDeMovil(tester);
+    final semantica = tester.ensureSemantics();
+    final datos = datosConSesion();
+    await tester.pumpWidget(appDePrueba(datos, PantallaDetalleMaterial(anuncio: datos.catalogo.first)));
+    await tester.tap(boton('Reservar'));
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsOneWidget);
+
+    await comprobarGuias(tester);
+    semantica.dispose();
+  });
 }
 
 Future<void> comprobarGuias(WidgetTester tester) async {

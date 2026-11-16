@@ -1,45 +1,49 @@
 import 'package:flutter/material.dart';
 
 import '../datos/modelos.dart';
+import '../tema/colores.dart';
 import '../tema/tema.dart';
+import '../widgets/dialogo_confirmar.dart';
 import '../widgets/fila_dato.dart';
 
 /// P6 · Confirmación de reserva (RF5). Es un diálogo dentro de la ficha (P4):
 /// resume qué se va a reservar y no hace nada hasta pulsar "Confirmar
-/// reserva". "Cancelar y volver" deja la ficha como estaba.
+/// reserva" (botón principal). "Cancelar y volver" es el botón secundario,
+/// blanco con borde, y deja la ficha como estaba: antes era rojo, pero en
+/// escala de grises se confundía con confirmar (revisión del 4.3).
 ///
 /// Devuelve `true` si se ha confirmado.
 Future<bool> mostrarConfirmacionReserva(BuildContext context, Anuncio anuncio) async {
   final confirmado = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      semanticLabel: '¿Confirmas la reserva?',
+      semanticLabel: 'Confirmar reserva',
       scrollable: true,
-      title: const Text('¿Confirmas la reserva?'),
+      title: const Text('Confirmar reserva'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FilaDato('Material', anuncio.nombre),
-          FilaDato('Tipo', anuncio.tipo.texto),
-          FilaDato('Precio', anuncio.precioTexto),
-          FilaDato('Fechas', anuncio.fechas),
-          FilaDato('Entrega', anuncio.entrega),
+          FilaResumen('Material', anuncio.nombre),
+          FilaResumen('Tipo', anuncio.tipo.texto),
+          FilaResumen('Precio', anuncio.precioTexto),
+          FilaResumen('Fechas', anuncio.fechas),
+          FilaResumen('Entrega', anuncio.entrega),
           const SizedBox(height: Espacio.m),
-          Text('Al confirmar se abre el chat con ${anuncio.dueno} para quedar.'),
+          Text(
+            'Al confirmar se abre el chat con ${anuncio.dueno} para quedar.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: ColoresApp.textoSecundario),
+          ),
+          const SizedBox(height: Espacio.l),
+          BotonesDialogo(
+            textoConfirmar: 'Confirmar reserva',
+            textoCancelar: 'Cancelar y volver',
+            icono: Icons.check,
+            alConfirmar: () => Navigator.pop(context, true),
+            alCancelar: () => Navigator.pop(context, false),
+          ),
         ],
       ),
-      actionsOverflowButtonSpacing: Espacio.s,
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancelar y volver'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Confirmar reserva'),
-        ),
-      ],
     ),
   );
   return confirmado ?? false;

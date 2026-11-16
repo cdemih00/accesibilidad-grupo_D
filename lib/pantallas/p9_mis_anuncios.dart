@@ -28,7 +28,7 @@ class PantallaMisAnuncios extends StatelessWidget {
         children: [
           // Cambio de la revisión de la semana 3 (3.7): en la prueba de primer
           // clic una persona buscó aquí cómo publicar, así que el botón también
-          // está en esta pantalla. Se llama igual que en la barra (RNF5).
+          // está en esta pantalla. Se llama igual que la pantalla 7 (RNF5).
           FilledButton.icon(
             onPressed: () => Navigator.pushNamed(context, Rutas.publicar),
             icon: const Icon(Icons.add),
@@ -62,8 +62,9 @@ class _TarjetaMiAnuncio extends StatelessWidget {
       context,
       titulo: '¿Retirar el anuncio?',
       mensaje: '"${anuncio.nombre}" dejará de aparecer en el buscador. Esto no se puede deshacer.',
-      textoConfirmar: 'Sí, retirar anuncio',
-      textoCancelar: 'No, mantenerlo',
+      textoConfirmar: 'Retirar anuncio',
+      textoCancelar: 'Volver sin retirar',
+      icono: Icons.delete_outline,
     );
     if (!retirar || !context.mounted) return;
     DatosScope.of(context, escuchar: false).retirar(anuncio);
@@ -85,14 +86,14 @@ class _TarjetaMiAnuncio extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(header: true, child: Text(anuncio.nombre, style: Theme.of(context).textTheme.titleMedium)),
+            Semantics(header: true, child: Text(anuncio.nombre, style: Theme.of(context).textTheme.titleSmall)),
             const SizedBox(height: Espacio.s),
-            Align(alignment: AlignmentDirectional.centerStart, child: EtiquetaEstado(estado: anuncio.estado)),
+            EtiquetaEstado(estado: anuncio.estado),
             const SizedBox(height: Espacio.s),
             FilaDato('Tipo', anuncio.tipo.texto),
             FilaDato('Precio', anuncio.precioTexto),
             FilaDato('Fechas', anuncio.fechas),
-            const SizedBox(height: Espacio.m),
+            const SizedBox(height: Espacio.s),
             if (reservado) ...[
               FilledButton.icon(
                 onPressed: () => _abrirChat(context),
@@ -106,9 +107,9 @@ class _TarjetaMiAnuncio extends StatelessWidget {
               icon: const Icon(Icons.edit_outlined),
               label: Text('Editar', semanticsLabel: 'Editar el anuncio ${anuncio.nombre}'),
             ),
-            // Más separación con la acción destructiva.
+            // Más separación con la acción de borrar (4.4).
             const SizedBox(height: Espacio.l),
-            OutlinedButton.icon(
+            FilledButton.icon(
               style: estiloBotonDestructivo(context),
               onPressed: () => _retirar(context),
               icon: const Icon(Icons.delete_outline),

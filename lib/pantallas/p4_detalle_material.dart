@@ -15,8 +15,8 @@ import 'p6_confirmar_reserva.dart';
 /// P4 · Detalles del material (recorrido 2, RF4).
 ///
 /// Fotos con su descripción (R7), condiciones en texto normal y con buen
-/// contraste (R4) y estado escrito (R6). Las fotos van una debajo de otra, sin
-/// carrusel, para no obligar a deslizar (R8).
+/// contraste (R4) y estado escrito con su icono (R6). Las fotos van una debajo
+/// de otra, sin carrusel, para no obligar a deslizar (R8).
 class PantallaDetalleMaterial extends StatelessWidget {
   const PantallaDetalleMaterial({super.key, required this.anuncio});
 
@@ -53,24 +53,27 @@ class PantallaDetalleMaterial extends StatelessWidget {
           // de cualquiera de las dos manos (R5).
           Container(
             padding: const EdgeInsets.all(Espacio.m),
-            decoration: BoxDecoration(
-              color: Paleta.de(context).fondo,
-              border: Border(top: BorderSide(color: Paleta.de(context).separador)),
+            decoration: const BoxDecoration(
+              color: ColoresApp.fondo,
+              border: Border(top: BorderSide(color: ColoresApp.separador)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Si no se puede reservar, se explica por qué (estado
+                // deshabilitado del 4.1).
                 if (!disponible) ...[
                   Text(
                     'Este material ya está reservado. Puedes preguntar al dueño cuándo vuelve a estar libre.',
-                    style: textos.bodyMedium,
+                    style: textos.bodySmall,
                   ),
                   const SizedBox(height: Espacio.s),
                 ],
-                FilledButton(
+                FilledButton.icon(
                   onPressed: disponible ? () => _reservar(context) : null,
-                  child: const Text('Reservar'),
+                  icon: const Icon(Icons.event_available),
+                  label: const Text('Reservar'),
                 ),
               ],
             ),
@@ -81,9 +84,9 @@ class PantallaDetalleMaterial extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
         children: [
-          Semantics(header: true, child: Text(anuncio.nombre, style: textos.headlineSmall)),
+          Semantics(header: true, child: Text(anuncio.nombre, style: textos.titleMedium)),
           const SizedBox(height: Espacio.s),
-          Align(alignment: AlignmentDirectional.centerStart, child: EtiquetaEstado(estado: anuncio.estado)),
+          EtiquetaEstado(estado: anuncio.estado),
           const SizedBox(height: Espacio.l),
           for (final (indice, foto) in fotos.indexed) ...[
             FotoMaterial(foto: foto, numero: indice + 1, total: fotos.length),

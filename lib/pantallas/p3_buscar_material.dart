@@ -4,14 +4,16 @@ import '../datos/datos_app.dart';
 import '../datos/modelos.dart';
 import '../tema/tema.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/campo_texto.dart';
 import '../widgets/estado_vacio.dart';
 import '../widgets/tarjeta_anuncio.dart';
 
 /// P3 · Buscar material: catálogo con buscador y filtros (recorrido 2, RF3).
 ///
 /// Cada resultado enseña el nombre, una frase de para qué sirve (R2), el tipo
-/// y el estado escrito (R6). El número de resultados se anuncia con TalkBack
-/// cada vez que cambia.
+/// y el estado escrito con su icono (R6). El número de resultados se anuncia
+/// con TalkBack cada vez que cambia. Los filtros y lo escrito se conservan al
+/// volver de una ficha (4.1).
 class PantallaBuscarMaterial extends StatefulWidget {
   const PantallaBuscarMaterial({super.key});
 
@@ -34,6 +36,13 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
       _soloDisponibles = false;
       _busqueda.clear();
     });
+  }
+
+  /// Los resultados ya se actualizan al escribir; "Buscar" además cierra el
+  /// teclado para que se vea la lista entera.
+  void _buscar() {
+    FocusScope.of(context).unfocus();
+    setState(() {});
   }
 
   @override
@@ -59,28 +68,24 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
         children: [
-          TextField(
-            controller: _busqueda,
-            onChanged: (_) => setState(() {}),
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              labelText: 'Buscar material',
-              hintText: 'Por ejemplo: calculadora',
-              prefixIcon: const Icon(Icons.search),
-              // Botón con texto en vez de una X suelta (R3).
-              suffixIcon: _busqueda.text.isEmpty
-                  ? null
-                  : TextButton(
-                      onPressed: () => setState(_busqueda.clear),
-                      child: const Text('Borrar', semanticsLabel: 'Borrar la búsqueda'),
-                    ),
-            ),
+          CampoTexto(
+            etiqueta: '¿Qué buscas?',
+            controlador: _busqueda,
+            pista: 'Calculadora, cámara, libro...',
+            accionTeclado: TextInputAction.search,
+            alCambiar: (_) => setState(() {}),
+            alEnviar: (_) => _buscar(),
+            alLado: FilledButton.icon(onPressed: _buscar, icon: const Icon(Icons.search), label: const Text('Buscar')),
           ),
           const SizedBox(height: Espacio.m),
           Card(
             child: ExpansionTile(
               title: const Text('Filtros'),
-              subtitle: Text(_filtrosActivos == 0 ? 'Ninguno activo' : 'Activos: $_filtrosActivos'),
+              // La etiqueta explica para qué sirve el control (4.4).
+              subtitle: Text(
+                'Por tipo, categoría y disponibilidad. '
+                '${_filtrosActivos == 0 ? 'Ninguno activo' : 'Activos: $_filtrosActivos'}',
+              ),
               childrenPadding: const EdgeInsets.fromLTRB(Espacio.m, 0, Espacio.m, Espacio.m),
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -124,7 +129,11 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
                 ),
                 if (_filtrosActivos > 0) ...[
                   const SizedBox(height: Espacio.m),
-                  OutlinedButton(onPressed: _quitarFiltros, child: const Text('Quitar filtros')),
+                  OutlinedButton.icon(
+                    onPressed: _quitarFiltros,
+                    icon: const Icon(Icons.filter_alt_off),
+                    label: const Text('Quitar filtros'),
+                  ),
                 ],
               ],
             ),
@@ -138,7 +147,7 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
                 1 => '1 material encontrado',
                 _ => '$cuantos materiales encontrados',
               },
-              style: textos.titleMedium,
+              style: textos.titleSmall,
             ),
           ),
           const SizedBox(height: Espacio.s),
@@ -147,6 +156,7 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
               icono: Icons.search_off,
               texto: 'Prueba con otra palabra o quita algún filtro.',
               textoBoton: 'Quitar filtros',
+              iconoBoton: Icons.filter_alt_off,
               alPulsar: _quitarFiltros,
             )
           else

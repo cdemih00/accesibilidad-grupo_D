@@ -5,13 +5,15 @@ import '../datos/modelos.dart';
 import '../navegacion/rutas.dart';
 import '../tema/colores.dart';
 import '../tema/tema.dart';
+import '../widgets/campo_texto.dart';
 import '../widgets/fila_dato.dart';
 
 /// P5 · Chat con la otra persona (final del recorrido 2, RF7).
 ///
 /// Tiene respuestas ya escritas para escribir menos con una mano (perfil de
-/// María). TalkBack lee cada mensaje con quién lo ha escrito ("Laura Gómez:
-/// ..."), no solo según el lado y el color de la burbuja.
+/// María): botones blancos con borde y texto azul que envían el mensaje al
+/// pulsarlos (4.1). TalkBack lee cada mensaje con quién lo ha escrito
+/// ("Laura Gómez: ..."), no solo según el lado y el color de la burbuja.
 class PantallaConversacion extends StatefulWidget {
   const PantallaConversacion({super.key, required this.conversacion});
 
@@ -26,6 +28,7 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
 
   final _mensaje = TextEditingController();
   final _desplazamiento = ScrollController();
+  String? _errorMensaje;
 
   @override
   void initState() {
@@ -51,9 +54,13 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
   }
 
   void _enviar(String texto) {
-    if (texto.trim().isEmpty) return;
+    if (texto.trim().isEmpty) {
+      setState(() => _errorMensaje = 'Escribe un mensaje antes de enviarlo o elige una respuesta rápida.');
+      return;
+    }
     DatosScope.of(context, escuchar: false).enviarMensaje(widget.conversacion, texto);
     _mensaje.clear();
+    setState(() => _errorMensaje = null);
     WidgetsBinding.instance.addPostFrameCallback((_) => _bajarDelTodo());
   }
 
@@ -77,7 +84,7 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
                 if (conversacion.mensajes.isEmpty)
                   Text(
                     'Todavía no hay mensajes. Puedes empezar con una respuesta rápida.',
-                    style: textos.bodyMedium?.copyWith(color: Paleta.de(context).textoSecundario),
+                    style: textos.bodyMedium?.copyWith(color: ColoresApp.textoSecundario),
                   ),
                 for (final mensaje in conversacion.mensajes) _Burbuja(mensaje: mensaje, otraPersona: conversacion.con),
                 const SizedBox(height: Espacio.m),
@@ -88,13 +95,39 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
                   runSpacing: Espacio.s,
                   children: [
                     for (final respuesta in _respuestasRapidas)
-                      ActionChip(label: Text(respuesta), onPressed: () => _enviar(respuesta)),
+                      OutlinedButton(onPressed: () => _enviar(respuesta), child: Text(respuesta)),
                   ],
                 ),
               ],
             ),
           ),
-          _CampoMensaje(controlador: _mensaje, alEnviar: () => _enviar(_mensaje.text)),
+          SafeArea(
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(Espacio.m, Espacio.s, Espacio.m, Espacio.m),
+              decoration: const BoxDecoration(
+                color: ColoresApp.fondo,
+                border: Border(top: BorderSide(color: ColoresApp.separador)),
+              ),
+              child: CampoTexto(
+                etiqueta: 'Mensaje',
+                controlador: _mensaje,
+                pista: 'Escribe tu mensaje',
+                lineasMinimas: 1,
+                lineasMaximas: 4,
+                mayusculas: TextCapitalization.sentences,
+                error: _errorMensaje,
+                alCambiar: (_) {
+                  if (_errorMensaje != null) setState(() => _errorMensaje = null);
+                },
+                alLado: FilledButton.icon(
+                  onPressed: () => _enviar(_mensaje.text),
+                  icon: const Icon(Icons.send),
+                  label: const Text('Enviar'),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -116,31 +149,34 @@ class _Cabecera extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(Espacio.m),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
                 Icon(
-                  hayReserva ? Icons.check_circle : Icons.info_outline,
-                  color: hayReserva ? Paleta.de(context).exito : Paleta.de(context).textoSecundario,
+                  hayReserva ? Icons.check_circle_outline : Icons.info_outline,
+                  color: hayReserva ? ColoresApp.exito : ColoresApp.textoSecundario,
                 ),
                 const SizedBox(width: Espacio.s),
                 Expanded(
                   child: Text(
                     hayReserva ? 'Reserva confirmada' : 'Sobre este material',
-                    style: Theme.of(context).textTheme.titleSmall,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: hayReserva ? ColoresApp.exito : ColoresApp.texto,
+                        ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: Espacio.xs),
+            const SizedBox(height: Espacio.s),
             FilaDato('Material', anuncio.nombre),
             FilaDato('Fechas', anuncio.fechas),
             if (hayReserva) ...[
-              const SizedBox(height: Espacio.xs),
-              TextButton(
+              const SizedBox(height: Espacio.s),
+              OutlinedButton.icon(
                 onPressed: () => irA(context, Rutas.misReservas),
-                child: const Text('Ir a Mis reservas'),
+                icon: const Icon(Icons.event_outlined),
+                label: const Text('Ir a Mis reservas'),
               ),
             ],
           ],
@@ -167,13 +203,13 @@ class _Burbuja extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.info_outline, size: 18, color: Paleta.de(context).textoSecundario),
-              const SizedBox(width: Espacio.xs),
+              const Icon(Icons.info_outline, size: 16, color: ColoresApp.textoSecundario),
+              const SizedBox(width: Espacio.s),
               Flexible(
                 child: Text(
                   mensaje.texto,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Paleta.de(context).textoSecundario),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: ColoresApp.textoSecundario),
                 ),
               ),
             ],
@@ -192,61 +228,17 @@ class _Burbuja extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.8),
           child: Container(
             margin: const EdgeInsets.only(bottom: Espacio.s),
-            padding: const EdgeInsets.symmetric(horizontal: Espacio.m, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: Espacio.m, vertical: Espacio.s),
             decoration: BoxDecoration(
-              color: mio ? Paleta.de(context).primarioSuave : Paleta.de(context).tarjeta,
-              border: Border.all(color: mio ? Paleta.de(context).primarioSuave : Paleta.de(context).separador),
+              color: mio ? ColoresApp.azulClaro : ColoresApp.fondo,
+              border: Border.all(color: mio ? ColoresApp.azulClaro : ColoresApp.borde),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
               mensaje.texto,
-              style: TextStyle(color: mio ? Paleta.de(context).sobrePrimarioSuave : Paleta.de(context).texto),
+              style: TextStyle(color: mio ? ColoresApp.azulOscuro : ColoresApp.texto),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CampoMensaje extends StatelessWidget {
-  const _CampoMensaje({required this.controlador, required this.alEnviar});
-
-  final TextEditingController controlador;
-  final VoidCallback alEnviar;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Paleta.de(context).fondo,
-          border: Border(top: BorderSide(color: Paleta.de(context).separador)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controlador,
-                minLines: 1,
-                maxLines: 4,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'Mensaje', hintText: 'Escribe tu mensaje'),
-              ),
-            ),
-            const SizedBox(width: Espacio.s),
-            // "Enviar" con texto (R3). Desactivado mientras no hay nada escrito.
-            ValueListenableBuilder<TextEditingValue>(
-              valueListenable: controlador,
-              builder: (context, valor, _) => FilledButton(
-                onPressed: valor.text.trim().isEmpty ? null : alEnviar,
-                child: const Text('Enviar'),
-              ),
-            ),
-          ],
         ),
       ),
     );

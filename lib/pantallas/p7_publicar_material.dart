@@ -7,6 +7,7 @@ import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/campo_texto.dart';
 import '../widgets/dialogo_confirmar.dart';
 import '../widgets/fila_dato.dart';
 import '../widgets/foto_material.dart';
@@ -16,8 +17,8 @@ import '../widgets/titulo_seccion.dart';
 ///
 /// - El anuncio se rellena en tres pasos con "Anterior" y "Siguiente" y se ve
 ///   en qué paso vas (RF8).
-/// - Cada foto necesita una frase que la describa y se ordena o se quita con
-///   botones, sin arrastrar (RF9, R7, R8).
+/// - Cada foto necesita una frase que la describa y se ordena o se borra con
+///   botones, sin arrastrar (RF9, R7, R8). "Borrar foto" pide confirmación.
 /// - Si se sale a mitad, se guarda un borrador y al volver se pregunta si se
 ///   quiere seguir (RF10).
 /// - Antes de publicar se revisa todo, con "Editar" en cada parte (RF11).
@@ -45,6 +46,9 @@ class _FotoNueva {
     foco.dispose();
   }
 }
+
+/// Mensaje de "foto sin descripción" del apartado 4.4.
+const _errorFotoSinDescripcion = 'Añade una descripción de la foto para que otras personas puedan saber qué muestra.';
 
 class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
   static const _pasos = ['Fotos', 'Descripción', 'Condiciones'];
@@ -149,6 +153,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
       mensaje: 'La última vez saliste sin terminar de publicarlo. ¿Quieres seguir donde lo dejaste?',
       textoConfirmar: 'Seguir con el anuncio',
       textoCancelar: 'Empezar de nuevo',
+      icono: Icons.edit_note,
       destructiva: false,
       cerrarTocandoFuera: false,
     );
@@ -171,7 +176,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
           _errorFotos = _fotos.isEmpty
               ? 'Falta añadir al menos una foto del material.'
               : sinDescribir >= 0
-                  ? 'Falta describir la foto ${sinDescribir + 1}. Escribe una frase que diga qué se ve en ella.'
+                  ? 'Añade una descripción de la foto ${sinDescribir + 1} para que otras personas puedan saber qué muestra.'
                   : null;
         });
         return _errorFotos == null;
@@ -285,7 +290,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
       esMio: true,
       fotos: fotos,
     ));
-    mostrarMensaje(context, 'Anuncio publicado. Lo tienes en Mis anuncios.');
+    mostrarMensaje(context, 'Material publicado. Lo tienes en Mis anuncios.');
     // Mapa de navegación: al publicar se va a Mis anuncios (P9).
     irA(context, Rutas.misAnuncios);
   }
@@ -311,15 +316,17 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
     });
   }
 
-  Future<void> _quitarFoto(int indice) async {
-    final quitar = await confirmarAccion(
+  Future<void> _borrarFoto(int indice) async {
+    final numero = indice + 1;
+    final borrar = await confirmarAccion(
       context,
-      titulo: '¿Quitar la foto ${indice + 1}?',
-      mensaje: 'Se quitará la foto y su descripción del anuncio.',
-      textoConfirmar: 'Quitar foto',
-      textoCancelar: 'No, dejarla',
+      titulo: '¿Borrar la foto $numero?',
+      mensaje: 'Se borrará la foto $numero y su descripción del anuncio.',
+      textoConfirmar: 'Borrar foto',
+      textoCancelar: 'Volver sin borrar',
+      icono: Icons.delete_outline,
     );
-    if (!quitar || !mounted) return;
+    if (!borrar || !mounted) return;
     final foto = _fotos[indice];
     setState(() => _fotos.removeAt(indice));
     WidgetsBinding.instance.addPostFrameCallback((_) => foto.dispose());
@@ -364,32 +371,42 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
 
   Widget _botones() {
     final revisando = _paso == _revision;
-    final textoPrincipal = revisando
-        ? (_editando ? 'Guardar cambios' : 'Publicar material')
+    final (String textoPrincipal, IconData iconoPrincipal) = revisando
+        ? (_editando ? ('Guardar cambios', Icons.save_outlined) : ('Publicar material', Icons.publish))
         : _desdeRevision
-            ? 'Volver a revisar'
+            ? ('Volver a revisar', Icons.fact_check_outlined)
             : _paso == _pasos.length - 1
-                ? 'Revisar anuncio'
-                : 'Siguiente';
+                ? ('Revisar anuncio', Icons.fact_check_outlined)
+                : ('Siguiente', Icons.arrow_forward);
     final conAnterior = _paso > 0 && !_desdeRevision && !(_editando && revisando);
 
     return SafeArea(
       top: false,
       child: Container(
         padding: const EdgeInsets.all(Espacio.m),
-        decoration: BoxDecoration(
-          color: Paleta.de(context).fondo,
-          border: Border(top: BorderSide(color: Paleta.de(context).separador)),
+        decoration: const BoxDecoration(
+          color: ColoresApp.fondo,
+          border: Border(top: BorderSide(color: ColoresApp.separador)),
         ),
         child: Row(
           children: [
             if (conAnterior) ...[
-              Expanded(child: OutlinedButton(onPressed: _atras, child: const Text('Anterior'))),
-              const SizedBox(width: Espacio.m),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _atras,
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Anterior'),
+                ),
+              ),
+              const SizedBox(width: Espacio.s),
             ],
             Expanded(
               flex: 2,
-              child: FilledButton(onPressed: revisando ? _publicar : _siguiente, child: Text(textoPrincipal)),
+              child: FilledButton.icon(
+                onPressed: revisando ? _publicar : _siguiente,
+                icon: Icon(iconoPrincipal),
+                label: Text(textoPrincipal),
+              ),
             ),
           ],
         ),
@@ -430,7 +447,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
       const SizedBox(height: Espacio.s),
       Text(
         'Versión de prueba: no se abre la cámara, se añade una foto de ejemplo.',
-        style: textos.bodySmall?.copyWith(color: Paleta.de(context).textoSecundario),
+        style: textos.bodySmall?.copyWith(color: ColoresApp.textoSecundario),
       ),
     ];
   }
@@ -449,43 +466,48 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
             const SizedBox(height: Espacio.s),
             MarcoFoto(icono: foto.icono, alto: 120),
             const SizedBox(height: Espacio.m),
-            TextField(
-              controller: foto.descripcion,
-              focusNode: foto.foco,
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: (_) {
+            CampoTexto(
+              etiqueta: 'Qué se ve en la foto $numero',
+              controlador: foto.descripcion,
+              foco: foto.foco,
+              pista: 'Por ejemplo: calculadora gris con la tapa puesta',
+              lineasMaximas: null,
+              mayusculas: TextCapitalization.sentences,
+              error: sinDescribir ? _errorFotoSinDescripcion : null,
+              alCambiar: (_) {
                 if (_errorFotos != null || sinDescribir) setState(() => _errorFotos = null);
               },
-              decoration: InputDecoration(
-                labelText: 'Qué se ve en la foto $numero',
-                hintText: 'Por ejemplo: calculadora gris con la tapa puesta',
-                errorText: sinDescribir ? 'Escribe una frase que describa esta foto.' : null,
-              ),
             ),
-            const SizedBox(height: Espacio.m),
-            // Ordenar y quitar con botones, nunca arrastrando (R8).
-            Wrap(
-              spacing: Espacio.s,
-              runSpacing: Espacio.s,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: indice == 0 ? null : () => _moverFoto(indice, -1),
-                  icon: const Icon(Icons.arrow_upward),
-                  label: Text('Subir', semanticsLabel: 'Subir la foto $numero'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: indice == _fotos.length - 1 ? null : () => _moverFoto(indice, 1),
-                  icon: const Icon(Icons.arrow_downward),
-                  label: Text('Bajar', semanticsLabel: 'Bajar la foto $numero'),
-                ),
-                OutlinedButton.icon(
-                  style: estiloBotonDestructivo(context),
-                  onPressed: () => _quitarFoto(indice),
-                  icon: const Icon(Icons.delete_outline),
-                  label: Text('Quitar', semanticsLabel: 'Quitar la foto $numero'),
-                ),
-              ],
+            // Ordenar con botones, nunca arrastrando (R8). Solo salen los que
+            // se pueden usar, así no hay botones deshabilitados sin explicación.
+            if (_fotos.length > 1) ...[
+              const SizedBox(height: Espacio.m),
+              Wrap(
+                spacing: Espacio.s,
+                runSpacing: Espacio.s,
+                children: [
+                  if (indice > 0)
+                    OutlinedButton.icon(
+                      onPressed: () => _moverFoto(indice, -1),
+                      icon: const Icon(Icons.arrow_upward),
+                      label: Text('Subir', semanticsLabel: 'Subir la foto $numero'),
+                    ),
+                  if (indice < _fotos.length - 1)
+                    OutlinedButton.icon(
+                      onPressed: () => _moverFoto(indice, 1),
+                      icon: const Icon(Icons.arrow_downward),
+                      label: Text('Bajar', semanticsLabel: 'Bajar la foto $numero'),
+                    ),
+                ],
+              ),
+            ],
+            // Acción de borrar separada de las demás (4.4).
+            const SizedBox(height: Espacio.l),
+            FilledButton.icon(
+              style: estiloBotonDestructivo(context),
+              onPressed: () => _borrarFoto(indice),
+              icon: const Icon(Icons.delete_outline),
+              label: Text('Borrar foto', semanticsLabel: 'Borrar la foto $numero'),
             ),
           ],
         ),
@@ -504,40 +526,33 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _nombre,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Nombre del material',
-                hintText: 'Por ejemplo: calculadora científica Casio',
-              ),
-              validator: _obligatorio('Escribe el nombre del material.'),
+            CampoTexto(
+              etiqueta: 'Nombre del material',
+              controlador: _nombre,
+              pista: 'Por ejemplo: calculadora científica Casio',
+              mayusculas: TextCapitalization.sentences,
+              accionTeclado: TextInputAction.next,
+              validador: _obligatorio('Escribe el nombre del material.'),
             ),
             const SizedBox(height: Espacio.l),
-            TextFormField(
-              controller: _paraQueSirve,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Para qué sirve (una frase)',
-                hintText: 'Por ejemplo: para los exámenes de Matemáticas',
-                helperText: 'Ayuda a quien no conoce el nombre técnico del material.',
-              ),
-              validator: _obligatorio('Escribe en una frase para qué sirve.'),
+            CampoTexto(
+              etiqueta: 'Para qué sirve (una frase)',
+              controlador: _paraQueSirve,
+              pista: 'Por ejemplo: para los exámenes de Matemáticas',
+              ayuda: 'Ayuda a quien no conoce el nombre técnico del material.',
+              mayusculas: TextCapitalization.sentences,
+              accionTeclado: TextInputAction.next,
+              validador: _obligatorio('Escribe en una frase para qué sirve.'),
             ),
             const SizedBox(height: Espacio.l),
-            TextFormField(
-              controller: _descripcion,
-              minLines: 3,
-              maxLines: null,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Descripción',
-                hintText: 'Estado, accesorios que incluye, modelo...',
-                alignLabelWithHint: true,
-              ),
-              validator: _obligatorio('Escribe una descripción del material.'),
+            CampoTexto(
+              etiqueta: 'Descripción',
+              controlador: _descripcion,
+              pista: 'Estado, accesorios que incluye, modelo...',
+              lineasMinimas: 3,
+              lineasMaximas: null,
+              mayusculas: TextCapitalization.sentences,
+              validador: _obligatorio('Escribe una descripción del material.'),
             ),
             const SizedBox(height: Espacio.l),
             Semantics(header: true, child: Text('Categoría', style: Theme.of(context).textTheme.titleSmall)),
@@ -588,37 +603,31 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
             ),
             if (_tipo == TipoCesion.alquiler) ...[
               const SizedBox(height: Espacio.l),
-              TextFormField(
-                controller: _precio,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  labelText: 'Precio por día',
-                  hintText: 'Por ejemplo: 3',
-                  suffixText: '€ al día',
-                ),
-                validator: (_) => _leerPrecio() == null ? 'Escribe el precio con números, por ejemplo 3 o 2,50.' : null,
+              CampoTexto(
+                etiqueta: 'Precio por día',
+                controlador: _precio,
+                pista: 'Por ejemplo: 3',
+                sufijo: '€ al día',
+                teclado: const TextInputType.numberWithOptions(decimal: true),
+                validador: (_) => _leerPrecio() == null ? 'Escribe el precio con números, por ejemplo 3 o 2,50.' : null,
               ),
             ],
             const SizedBox(height: Espacio.l),
-            TextFormField(
-              controller: _fechas,
-              textCapitalization: TextCapitalization.sentences,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Cuándo se puede prestar',
-                hintText: 'Por ejemplo: de lunes a viernes por la tarde',
-              ),
-              validator: _obligatorio('Escribe cuándo se puede prestar o recoger.'),
+            CampoTexto(
+              etiqueta: 'Cuándo se puede prestar',
+              controlador: _fechas,
+              pista: 'Por ejemplo: de lunes a viernes por la tarde',
+              mayusculas: TextCapitalization.sentences,
+              accionTeclado: TextInputAction.next,
+              validador: _obligatorio('Escribe cuándo se puede prestar o recoger.'),
             ),
             const SizedBox(height: Espacio.l),
-            TextFormField(
-              controller: _entrega,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Dónde se entrega',
-                hintText: 'Por ejemplo: biblioteca del campus',
-              ),
-              validator: _obligatorio('Escribe dónde se entrega el material.'),
+            CampoTexto(
+              etiqueta: 'Dónde se entrega',
+              controlador: _entrega,
+              pista: 'Por ejemplo: biblioteca del campus',
+              mayusculas: TextCapitalization.sentences,
+              validador: _obligatorio('Escribe dónde se entrega el material.'),
             ),
           ],
         ),
@@ -684,8 +693,11 @@ class _Progreso extends StatelessWidget {
         : 'Paso ${paso + 1} de ${pasos.length}: ${pasos[paso]}';
 
     return Container(
-      color: Paleta.de(context).tarjeta,
-      padding: const EdgeInsets.fromLTRB(Espacio.m, Espacio.m, Espacio.m, 12),
+      padding: const EdgeInsets.all(Espacio.m),
+      decoration: const BoxDecoration(
+        color: ColoresApp.fondo,
+        border: Border(bottom: BorderSide(color: ColoresApp.separador)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -722,6 +734,7 @@ class _ApartadoRevision extends StatelessWidget {
                 titulo: titulo,
                 textoBoton: 'Editar',
                 etiquetaBoton: 'Editar ${titulo.toLowerCase()}',
+                iconoBoton: Icons.edit_outlined,
                 alPulsar: alEditar,
               ),
               ...hijos,

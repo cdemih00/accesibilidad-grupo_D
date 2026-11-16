@@ -17,9 +17,9 @@ Future<bool> mostrarConfirmacionReserva(BuildContext context, Anuncio anuncio) a
   final confirmado = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      semanticLabel: 'Confirmar reserva',
+      semanticLabel: 'Resumen de la reserva',
       scrollable: true,
-      title: const Text('Confirmar reserva'),
+      title: const Text('Resumen de la reserva'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,

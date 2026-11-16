@@ -51,6 +51,21 @@ class TarjetaAnuncio extends StatelessWidget {
                         ),
                         const SizedBox(height: Espacio.s),
                         EtiquetaEstado(estado: anuncio.estado),
+                        if (anuncio.estado == EstadoMaterial.reservado) ...[
+                          const SizedBox(height: Espacio.s),
+                          Text(
+                            'Puedes consultar la ficha; no disponible para reservar.',
+                            style: textos.bodySmall?.copyWith(color: ColoresApp.textoSecundario),
+                          ),
+                        ],
+                        const SizedBox(height: Espacio.s),
+                        Text(
+                          'Ver detalle ›',
+                          style: textos.labelLarge?.copyWith(
+                            color: ColoresApp.azul,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ],
                     ),
                   ),

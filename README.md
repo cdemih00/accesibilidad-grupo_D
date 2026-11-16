@@ -157,8 +157,13 @@ Si cambiáis algún color, solo hay que tocar `lib/tema/colores.dart` y volver a
 
 ## Verificación del 16/11/2026
 
-- Flutter 3.50.0 y Dart 3.14.0: `flutter test` supera 56 pruebas (51 originales, 4 de regresión de la barra y 1 de mediciones).
+- Flutter 3.50.0 y Dart 3.14.0: `flutter test` supera 58 pruebas (51 originales, 4 de regresión de la barra, 1 de mediciones y 2 de revisión cruzada).
 - APK debug compilada para Android; Android Gradle Plugin 9.1.1 permite compilar con ese SDK.
 - Alta, reserva con chat y publicación comprobadas con datos ficticios en Medium Phone API 36.1 (1080×2400, 420 dpi).
 - Barra comprobada visualmente con texto al 200 %: etiquetas completas y dos columnas. Se ha restaurado el tamaño normal del emulador.
 - Las medidas cubren una muestra de controles; no constituyen una auditoría exhaustiva ni una prueba manual con TalkBack.
+### Cambios tras la revisión cruzada
+
+- Las tarjetas muestran «Ver detalle ›». Las reservadas aclaran que se puede consultar la ficha, aunque no volver a reservar.
+- La confirmación usa «Resumen de la reserva» como título y mantiene «Confirmar reserva» como acción. Se conserva el diálogo sobre la ficha y la barra de navegación.
+- Comprobados en emulador y cubiertos por pruebas de acceso a la ficha, reserva deshabilitada y cancelación del diálogo.

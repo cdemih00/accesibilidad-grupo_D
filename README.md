@@ -151,6 +151,14 @@ Si cambiáis algún color, solo hay que tocar `lib/tema/colores.dart` y volver a
 
 ## Notas
 
-- **El título de arriba solo crece hasta 1,3 veces** con la letra al 200 %. Es como viene ese componente en Flutter. En la barra de abajo, si con la letra muy grande una palabra no cabe en su hueco, se reduce en vez de cortarse. TalkBack lee el nombre completo en los dos casos. Todo lo demás crece entero.
+- **El título de arriba solo crece hasta 1,3 veces** con la letra al 200 %. Es como viene ese componente en Flutter. La barra inferior conserva el tamaño de las etiquetas: muestra cuatro opciones por fila con texto normal y dos con letra grande, con 8 dp entre zonas táctiles. Todo lo demás crece entero.
 - **Simulado:** la cámara, el envío del código y que la sesión y los ajustes se queden guardados. Si hiciera falta que lo escrito sobreviva a que Android cierre la aplicación (RNF7), se puede usar la restauración de estado de Flutter, sin base de datos.
-- **Pendiente para la semana 5:** la prueba con TalkBack en un móvil real y las capturas con la letra grande en el emulador.
+- **Pendiente para la semana 5:** la prueba manual con TalkBack en un móvil real y la validación en iOS.
+
+## Verificación del 16/11/2026
+
+- Flutter 3.50.0 y Dart 3.14.0: `flutter test` supera 56 pruebas (51 originales, 4 de regresión de la barra y 1 de mediciones).
+- APK debug compilada para Android; Android Gradle Plugin 9.1.1 permite compilar con ese SDK.
+- Alta, reserva con chat y publicación comprobadas con datos ficticios en Medium Phone API 36.1 (1080×2400, 420 dpi).
+- Barra comprobada visualmente con texto al 200 %: etiquetas completas y dos columnas. Se ha restaurado el tamaño normal del emulador.
+- Las medidas cubren una muestra de controles; no constituyen una auditoría exhaustiva ni una prueba manual con TalkBack.

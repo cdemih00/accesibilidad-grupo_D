@@ -33,12 +33,13 @@ lib/
     datos_app.dart          estado en memoria (sesión, reservas, chats, anuncios)
     datos_prueba.dart       datos inventados sacados de la memoria
   pantallas/                una pantalla por archivo, con el número del inventario
-  widgets/                  piezas que se repiten (campo de texto, barra de opciones, estado...)
+  widgets/                  piezas que se repiten (barra de arriba, campo de texto, barra de opciones, estado, carga...)
 assets/fuentes/             tipografía Lexend y su licencia (SIL Open Font License)
 test/
   contraste_test.dart       contraste de la paleta (PASS/FAIL)
   accesibilidad_test.dart   guías de accesibilidad de Flutter en cada pantalla
   texto_grande_test.dart    todas las pantallas con la letra al 200 %
+  barra_superior_test.dart  el título de arriba se lee entero con la letra al 200 %
   recorridos_test.dart      los tres recorridos críticos de principio a fin
 ```
 
@@ -58,7 +59,8 @@ test/
   - "Disponible" en verde con ✓ y "Reservado" en gris con un reloj;
   - filtros marcados con fondo azul claro, texto azul oscuro y ✓;
   - en la barra de abajo, la opción actual va en azul, en negrita y con una raya encima;
-  - las confirmaciones salen en verde y en negrita.
+  - las confirmaciones salen en verde y en negrita;
+  - mientras se publica sale un círculo que gira con "Publicando el anuncio…" y los botones se desactivan.
 - **Diálogos de confirmación:** confirmar arriba (azul, o rojo si borra algo) y cancelar debajo como botón secundario. Los botones nombran la acción y la alternativa ("Retirar anuncio" / "Volver sin retirar").
 
 ## Pantallas y navegación
@@ -99,7 +101,7 @@ Cómo está montado el mapa de navegación:
 | RF8–RF11 Publicar por pasos, fotos descritas, borrador y revisión | `p7_publicar_material.dart` |
 | RF12 Editar o retirar un anuncio | `p9_mis_anuncios.dart`, que para editar reutiliza `p7_publicar_material.dart` |
 | RNF1 Contraste | `tema/colores.dart` + `test/contraste_test.dart` + guía `textContrastGuideline` |
-| RNF2 Letra mínima de 14 sp y texto al 200 % | `tema/tema.dart` (no se bloquea el escalado) + `test/texto_grande_test.dart` |
+| RNF2 Letra mínima de 14 sp y texto al 200 % | `tema/tema.dart` (no se bloquea el escalado), `widgets/barra_superior.dart` (el título de arriba no se corta) + `test/texto_grande_test.dart` y `test/barra_superior_test.dart` |
 | RNF3 Botones de 48 × 48 y 8 dp de separación | `tema/tema.dart` + guías `androidTapTargetGuideline` e `iOSTapTargetGuideline` |
 | RNF4 Etiquetas siempre visibles en los campos | `widgets/campo_texto.dart` (etiqueta fuera, encima) |
 | RNF5 Mismos nombres en todas las pantallas | "Reservar", "Publicar material", "Inicio", "Disponible" y "Reservado" en todas partes |
@@ -118,7 +120,8 @@ Lo que está pensado para la accesibilidad en todas las pantallas:
   - las fotos, con su descripción;
   - el estado "Disponible/Reservado";
   - los títulos van marcados como encabezado;
-  - los errores y avisos los lee TalkBack al aparecer.
+  - los errores, los avisos y la espera al publicar los lee TalkBack al aparecer.
+- **Sin ruido para TalkBack:** los iconos que acompañan a un texto no se leen, y el "Ver detalle ›" de las tarjetas tampoco, porque repetiría lo que ya dice el botón ("toca dos veces para abrir la ficha").
 - **Sin botones de solo icono.** Todos llevan texto. La única excepción es la flecha de atrás, que es la estándar y TalkBack lee "Atrás" porque la aplicación está en español. Para ver la contraseña hay una casilla "Mostrar la contraseña" en vez de un ojo dentro del campo.
 - **Mensajes de error del apartado 4.4:**
   - "Ese correo no es de la universidad. Usa tu correo @estudiantes.unileon.es o @unileon.es."
@@ -151,8 +154,8 @@ Si cambiáis algún color, solo hay que tocar `lib/tema/colores.dart` y volver a
 
 ## Notas
 
-- **El título de arriba solo crece hasta 1,3 veces** con la letra al 200 %. Es como viene ese componente en Flutter. La barra inferior conserva el tamaño de las etiquetas: muestra cuatro opciones por fila con texto normal y dos con letra grande, con 8 dp entre zonas táctiles. Todo lo demás crece entero.
-- **Simulado:** la cámara, el envío del código y que la sesión y los ajustes se queden guardados. Si hiciera falta que lo escrito sobreviva a que Android cierre la aplicación (RNF7), se puede usar la restauración de estado de Flutter, sin base de datos.
+- **El título de arriba solo crece hasta 1,34 veces** con la letra al 200 %. Es como viene ese componente en Flutter, pero ya no se corta: si no cabe en una línea, baja a la siguiente y la barra crece (`widgets/barra_superior.dart`). La barra inferior conserva el tamaño de las etiquetas: muestra cuatro opciones por fila con texto normal y dos con letra grande, con 8 dp entre zonas táctiles. Todo lo demás crece entero.
+- **Simulado:** la cámara, el envío del código, la espera al publicar (2 segundos, para que se vea el estado de carga) y que la sesión y los ajustes se queden guardados. Si hiciera falta que lo escrito sobreviva a que Android cierre la aplicación (RNF7), se puede usar la restauración de estado de Flutter, sin base de datos.
 - **Pendiente para la semana 5:** la prueba manual con TalkBack en un móvil real y la validación en iOS.
 
 ## Verificación del 16/11/2026

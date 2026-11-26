@@ -6,6 +6,7 @@ import '../navegacion/rutas.dart';
 import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/campo_texto.dart';
 
 /// Mensajes de error del apartado 4.4 para el correo (también los usa la
@@ -73,7 +74,7 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
         if (!salio) setState(() => _codigoEnviado = false);
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Crear cuenta')),
+        appBar: barraSuperior(context, 'Crear cuenta'),
         body: SafeArea(
           child: AutofillGroup(
             child: ListView(
@@ -89,7 +90,7 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
   List<Widget> _pasoDatos(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return [
-      Semantics(header: true, child: Text('Paso 1 de 2: tus datos', style: textos.titleMedium)),
+      Semantics(header: true, container: true, child: Text('Paso 1 de 2: tus datos', style: textos.titleMedium)),
       const SizedBox(height: Espacio.l),
       Form(
         key: _formulario,
@@ -145,7 +146,7 @@ class _PantallaCrearCuentaState extends State<PantallaCrearCuenta> {
   List<Widget> _pasoCodigo(BuildContext context) {
     final textos = Theme.of(context).textTheme;
     return [
-      Semantics(header: true, child: Text('Paso 2 de 2: código de verificación', style: textos.titleMedium)),
+      Semantics(header: true, container: true, child: Text('Paso 2 de 2: código de verificación', style: textos.titleMedium)),
       const SizedBox(height: Espacio.m),
       Text('Hemos enviado un código de 6 números a ${_correo.text.trim()}.', style: textos.bodyLarge),
       const SizedBox(height: Espacio.s),

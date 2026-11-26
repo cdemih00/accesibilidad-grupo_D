@@ -6,6 +6,7 @@ import '../navegacion/rutas.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/dialogo_confirmar.dart';
 import '../widgets/estado_vacio.dart';
 import '../widgets/etiqueta_estado.dart';
@@ -21,7 +22,7 @@ class PantallaMisAnuncios extends StatelessWidget {
     final misAnuncios = DatosScope.of(context).misAnuncios;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis anuncios')),
+      appBar: barraSuperior(context, 'Mis anuncios'),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.inicio),
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
@@ -83,39 +84,49 @@ class _TarjetaMiAnuncio extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(Espacio.m),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Semantics(header: true, child: Text(anuncio.nombre, style: Theme.of(context).textTheme.titleSmall)),
-            const SizedBox(height: Espacio.s),
-            EtiquetaEstado(estado: anuncio.estado),
-            const SizedBox(height: Espacio.s),
-            FilaDato('Tipo', anuncio.tipo.texto),
-            FilaDato('Precio', anuncio.precioTexto),
-            FilaDato('Fechas', anuncio.fechas),
-            const SizedBox(height: Espacio.s),
-            if (reservado) ...[
-              FilledButton.icon(
-                onPressed: () => _abrirChat(context),
-                icon: const Icon(Icons.chat_bubble_outline),
-                label: const Text('Abrir chat'),
+        // Cada dato de la tarjeta se lee como un elemento propio, después del
+        // nombre (encabezado). Sin esto se leía todo junto como encabezado.
+        child: Semantics(
+          container: true,
+          explicitChildNodes: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Semantics(
+                header: true,
+                container: true,
+                child: Text(anuncio.nombre, style: Theme.of(context).textTheme.titleSmall),
               ),
               const SizedBox(height: Espacio.s),
+              EtiquetaEstado(estado: anuncio.estado),
+              const SizedBox(height: Espacio.s),
+              FilaDato('Tipo', anuncio.tipo.texto),
+              FilaDato('Precio', anuncio.precioTexto),
+              FilaDato('Fechas', anuncio.fechas),
+              const SizedBox(height: Espacio.s),
+              if (reservado) ...[
+                FilledButton.icon(
+                  onPressed: () => _abrirChat(context),
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: const Text('Abrir chat'),
+                ),
+                const SizedBox(height: Espacio.s),
+              ],
+              OutlinedButton.icon(
+                onPressed: () => Navigator.pushNamed(context, Rutas.publicar, arguments: anuncio),
+                icon: const Icon(Icons.edit_outlined),
+                label: Text('Editar', semanticsLabel: 'Editar el anuncio ${anuncio.nombre}'),
+              ),
+              // Más separación con la acción de borrar (4.4).
+              const SizedBox(height: Espacio.l),
+              FilledButton.icon(
+                style: estiloBotonDestructivo(context),
+                onPressed: () => _retirar(context),
+                icon: const Icon(Icons.delete_outline),
+                label: Text('Retirar anuncio', semanticsLabel: 'Retirar el anuncio ${anuncio.nombre}'),
+              ),
             ],
-            OutlinedButton.icon(
-              onPressed: () => Navigator.pushNamed(context, Rutas.publicar, arguments: anuncio),
-              icon: const Icon(Icons.edit_outlined),
-              label: Text('Editar', semanticsLabel: 'Editar el anuncio ${anuncio.nombre}'),
-            ),
-            // Más separación con la acción de borrar (4.4).
-            const SizedBox(height: Espacio.l),
-            FilledButton.icon(
-              style: estiloBotonDestructivo(context),
-              onPressed: () => _retirar(context),
-              icon: const Icon(Icons.delete_outline),
-              label: Text('Retirar anuncio', semanticsLabel: 'Retirar el anuncio ${anuncio.nombre}'),
-            ),
-          ],
+          ),
         ),
       ),
     );

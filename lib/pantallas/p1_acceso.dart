@@ -36,6 +36,7 @@ class PantallaAcceso extends StatelessWidget {
                     const SizedBox(height: Espacio.m),
                     Semantics(
                       header: true,
+                      container: true,
                       child: Text('EmprestApp', textAlign: TextAlign.center, style: textos.headlineLarge),
                     ),
                     const SizedBox(height: Espacio.s),

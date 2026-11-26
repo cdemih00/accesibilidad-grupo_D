@@ -5,6 +5,7 @@ import '../datos/modelos.dart';
 import '../navegacion/rutas.dart';
 import '../tema/tema.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/etiqueta_estado.dart';
 import '../widgets/fila_dato.dart';
 import '../widgets/tarjeta_anuncio.dart';
@@ -23,9 +24,10 @@ class PantallaMenuPrincipal extends StatelessWidget {
     final misAnuncios = datos.misAnuncios;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inicio'),
-        actions: [
+      appBar: barraSuperior(
+        context,
+        'Inicio',
+        acciones: [
           // Ajustes (P10) con icono y texto, no solo con el engranaje (R3).
           OutlinedButton.icon(
             onPressed: () => Navigator.pushNamed(context, Rutas.ajustes),

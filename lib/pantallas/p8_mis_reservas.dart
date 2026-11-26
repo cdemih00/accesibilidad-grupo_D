@@ -7,6 +7,7 @@ import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/dialogo_confirmar.dart';
 import '../widgets/estado_vacio.dart';
 import '../widgets/fila_dato.dart';
@@ -21,7 +22,7 @@ class PantallaMisReservas extends StatelessWidget {
     final reservas = DatosScope.of(context).reservas;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Mis reservas')),
+      appBar: barraSuperior(context, 'Mis reservas'),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.inicio),
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
@@ -79,44 +80,50 @@ class _TarjetaReserva extends StatelessWidget {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(Espacio.m),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Semantics(header: true, child: Text(anuncio.nombre, style: textos.titleSmall)),
-            const SizedBox(height: Espacio.s),
-            // Estado con icono y texto (RNF10).
-            Row(
-              children: [
-                const Icon(Icons.check_circle_outline, color: ColoresApp.exito, size: 20),
-                const SizedBox(width: Espacio.s),
-                Expanded(
-                  child: Text(
-                    'Reserva confirmada',
-                    style: textos.labelMedium?.copyWith(color: ColoresApp.exito, fontWeight: FontWeight.w700),
+        // Cada dato de la tarjeta se lee como un elemento propio, después del
+        // nombre (encabezado). Sin esto se leía todo junto como encabezado.
+        child: Semantics(
+          container: true,
+          explicitChildNodes: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Semantics(header: true, container: true, child: Text(anuncio.nombre, style: textos.titleSmall)),
+              const SizedBox(height: Espacio.s),
+              // Estado con icono y texto (RNF10).
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_outline, color: ColoresApp.exito, size: 20),
+                  const SizedBox(width: Espacio.s),
+                  Expanded(
+                    child: Text(
+                      'Reserva confirmada',
+                      style: textos.labelMedium?.copyWith(color: ColoresApp.exito, fontWeight: FontWeight.w700),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Espacio.s),
-            FilaDato('Fechas', anuncio.fechas),
-            FilaDato('Devolución', reserva.devolucion),
-            FilaDato('Dueño', anuncio.dueno),
-            FilaDato('Entrega', anuncio.entrega),
-            const SizedBox(height: Espacio.s),
-            FilledButton.icon(
-              onPressed: () => _abrirChat(context),
-              icon: const Icon(Icons.chat_bubble_outline),
-              label: const Text('Abrir chat'),
-            ),
-            // Más separación con la acción de borrar para no pulsarla sin querer (4.4).
-            const SizedBox(height: Espacio.l),
-            FilledButton.icon(
-              style: estiloBotonDestructivo(context),
-              onPressed: () => _cancelar(context),
-              icon: const Icon(Icons.event_busy_outlined),
-              label: Text('Cancelar reserva', semanticsLabel: 'Cancelar la reserva de ${anuncio.nombre}'),
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: Espacio.s),
+              FilaDato('Fechas', anuncio.fechas),
+              FilaDato('Devolución', reserva.devolucion),
+              FilaDato('Dueño', anuncio.dueno),
+              FilaDato('Entrega', anuncio.entrega),
+              const SizedBox(height: Espacio.s),
+              FilledButton.icon(
+                onPressed: () => _abrirChat(context),
+                icon: const Icon(Icons.chat_bubble_outline),
+                label: const Text('Abrir chat'),
+              ),
+              // Más separación con la acción de borrar para no pulsarla sin querer (4.4).
+              const SizedBox(height: Espacio.l),
+              FilledButton.icon(
+                style: estiloBotonDestructivo(context),
+                onPressed: () => _cancelar(context),
+                icon: const Icon(Icons.event_busy_outlined),
+                label: Text('Cancelar reserva', semanticsLabel: 'Cancelar la reserva de ${anuncio.nombre}'),
+              ),
+            ],
+          ),
         ),
       ),
     );

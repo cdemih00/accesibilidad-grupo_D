@@ -35,6 +35,23 @@ void main() {
     semantica.dispose();
   });
 
+  testWidgets('P3 · Cada tarjeta se lee de una vez y sin repetir «Ver detalle»', (tester) async {
+    usarPantallaDeMovil(tester);
+    final semantica = tester.ensureSemantics();
+    await tester.pumpWidget(appDePrueba(datosConSesion(), const PantallaBuscarMaterial()));
+    await tester.pumpAndSettle();
+
+    final tarjeta = tester.getSemantics(find.text('Cámara réflex'));
+    expect(tarjeta, isSemantics(isButton: true, hasTapAction: true));
+    final leido = tarjeta.getSemanticsData().label;
+    expect(leido, startsWith('Cámara réflex'));
+    expect(leido, contains('Estado: Disponible'));
+    expect(leido, isNot(contains('Ver detalle')));
+    // En pantalla se sigue viendo.
+    expect(find.text('Ver detalle ›'), findsWidgets);
+    semantica.dispose();
+  });
+
   testWidgets('P7 · Paso de fotos con dos fotos añadidas cumple las guías de accesibilidad', (tester) async {
     usarPantallaDeMovil(tester);
     final semantica = tester.ensureSemantics();

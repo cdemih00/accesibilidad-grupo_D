@@ -59,11 +59,17 @@ class TarjetaAnuncio extends StatelessWidget {
                           ),
                         ],
                         const SizedBox(height: Espacio.s),
-                        Text(
-                          'Ver detalle ›',
-                          style: textos.labelLarge?.copyWith(
-                            color: ColoresApp.azul,
-                            decoration: TextDecoration.underline,
+                        // Pista para quien ve la pantalla (revisión cruzada).
+                        // TalkBack no la lee: ya dice "botón, toca dos veces
+                        // para abrir la ficha", y repetirlo en cada tarjeta de
+                        // la lista solo es ruido.
+                        ExcludeSemantics(
+                          child: Text(
+                            'Ver detalle ›',
+                            style: textos.labelLarge?.copyWith(
+                              color: ColoresApp.azul,
+                              decoration: TextDecoration.underline,
+                            ),
                           ),
                         ),
                       ],

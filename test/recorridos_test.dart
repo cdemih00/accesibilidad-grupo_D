@@ -147,6 +147,13 @@ void main() {
     expect(find.text('Revisar el anuncio antes de publicar'), findsOneWidget);
 
     await tester.tap(boton('Publicar material'));
+    await tester.pump();
+    // Estado de carga: se ve, TalkBack lo lee al aparecer y no se puede volver a pulsar.
+    expect(
+      tester.getSemantics(find.text('Publicando el anuncio…')),
+      isSemantics(label: 'Publicando el anuncio…', isLiveRegion: true),
+    );
+    expect(tester.widget<ButtonStyleButton>(boton('Publicar material')).enabled, isFalse);
     await tester.pumpAndSettle();
     expect(find.text('Mis anuncios'), findsOneWidget);
     expect(find.text('Calculadora gráfica'), findsOneWidget);

@@ -41,6 +41,7 @@ class TituloSeccion extends StatelessWidget {
         children: [
           Semantics(
             header: true,
+            container: true,
             child: Text(titulo, style: Theme.of(context).textTheme.titleMedium),
           ),
           if (texto != null)

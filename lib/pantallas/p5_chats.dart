@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../datos/datos_app.dart';
 import '../navegacion/rutas.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/estado_vacio.dart';
 
 /// P5 · Chats: lista de conversaciones. Se llega desde la barra de opciones,
@@ -15,7 +16,7 @@ class PantallaChats extends StatelessWidget {
     final conversaciones = DatosScope.of(context).conversaciones;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chats')),
+      appBar: barraSuperior(context, 'Chats'),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.chats),
       body: conversaciones.isEmpty
           ? ListView(

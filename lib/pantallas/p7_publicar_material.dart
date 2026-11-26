@@ -7,10 +7,12 @@ import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/campo_texto.dart';
 import '../widgets/dialogo_confirmar.dart';
 import '../widgets/fila_dato.dart';
 import '../widgets/foto_material.dart';
+import '../widgets/indicador_carga.dart';
 import '../widgets/titulo_seccion.dart';
 
 /// P7 · Publicar material (recorrido 3).
@@ -54,6 +56,10 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
   static const _pasos = ['Fotos', 'Descripción', 'Condiciones'];
   static const _revision = 3;
 
+  /// Lo que tarda en publicarse. No hay servidor y la espera es simulada, pero
+  /// así se ve y se oye el estado de carga.
+  static const _esperaAlPublicar = Duration(seconds: 2);
+
   late DatosApp _datos;
   int _paso = 0;
 
@@ -61,6 +67,9 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
   /// vuelve directamente a la revisión.
   bool _desdeRevision = false;
   bool _terminado = false;
+
+  /// Se está publicando (estado de carga): mientras dura no se puede tocar nada.
+  bool _publicando = false;
 
   final _fotos = <_FotoNueva>[];
   final _nombre = TextEditingController();
@@ -240,7 +249,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
     return (precio == null || precio <= 0) ? null : precio;
   }
 
-  void _publicar() {
+  Future<void> _publicar() async {
     final incompleto = _primerPasoIncompleto();
     if (incompleto != null) {
       // Se lleva a la persona al paso que falta y se le enseña el error.
@@ -253,6 +262,13 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
       });
       return;
     }
+
+    // Estado de carga: en una aplicación de verdad aquí se subirían las fotos.
+    // Abajo sale "Publicando el anuncio…" (o "Guardando los cambios…"), que
+    // TalkBack lee al aparecer, y no se puede pulsar nada hasta que termina.
+    setState(() => _publicando = true);
+    await Future<void>.delayed(_esperaAlPublicar);
+    if (!mounted) return;
 
     final fotos = [for (final foto in _fotos) Foto(descripcion: foto.descripcion.text.trim(), icono: foto.icono)];
     final precio = _tipo == TipoCesion.alquiler ? _leerPrecio()! : 0.0;
@@ -339,31 +355,36 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _atrasSaleDeLaPantalla,
+      canPop: _atrasSaleDeLaPantalla && !_publicando,
       onPopInvokedWithResult: (salio, _) {
-        if (!salio) _atras();
+        if (!salio && !_publicando) _atras();
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text(_editando ? 'Editar anuncio' : 'Publicar material')),
-        bottomNavigationBar: _editando ? null : const BarraOpciones(actual: SeccionBarra.publicar),
-        body: Column(
-          children: [
-            _Progreso(paso: _paso, pasos: _pasos, editando: _editando),
-            Expanded(
-              child: ListView(
-                // Una lista nueva por paso para empezar arriba del todo.
-                key: ValueKey(_paso),
-                padding: const EdgeInsets.all(Espacio.m),
-                children: switch (_paso) {
-                  0 => _pasoFotos(),
-                  1 => _pasoDescripcion(),
-                  2 => _pasoCondiciones(),
-                  _ => _pasoRevision(),
-                },
+      // Mientras se publica no se puede tocar nada, tampoco la barra de abajo.
+      // TalkBack sigue pudiendo leer la pantalla.
+      child: IgnorePointer(
+        ignoring: _publicando,
+        child: Scaffold(
+          appBar: barraSuperior(context, _editando ? 'Editar anuncio' : 'Publicar material'),
+          bottomNavigationBar: _editando ? null : const BarraOpciones(actual: SeccionBarra.publicar),
+          body: Column(
+            children: [
+              _Progreso(paso: _paso, pasos: _pasos, editando: _editando),
+              Expanded(
+                child: ListView(
+                  // Una lista nueva por paso para empezar arriba del todo.
+                  key: ValueKey(_paso),
+                  padding: const EdgeInsets.all(Espacio.m),
+                  children: switch (_paso) {
+                    0 => _pasoFotos(),
+                    1 => _pasoDescripcion(),
+                    2 => _pasoCondiciones(),
+                    _ => _pasoRevision(),
+                  },
+                ),
               ),
-            ),
-            _botones(),
-          ],
+              _botones(),
+            ],
+          ),
         ),
       ),
     );
@@ -388,26 +409,31 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
           color: ColoresApp.fondo,
           border: Border(top: BorderSide(color: ColoresApp.separador)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (conAnterior) ...[
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _atras,
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Anterior'),
-                ),
-              ),
-              const SizedBox(width: Espacio.s),
+            if (_publicando) ...[
+              IndicadorCarga(_editando ? 'Guardando los cambios…' : 'Publicando el anuncio…'),
+              const SizedBox(height: Espacio.m),
             ],
-            Expanded(
-              flex: 2,
-              child: FilledButton.icon(
-                onPressed: revisando ? _publicar : _siguiente,
-                icon: Icon(iconoPrincipal),
-                label: Text(textoPrincipal),
-              ),
+            // Uno debajo del otro, como en los diálogos (4.1): el principal
+            // arriba y "Anterior" debajo. Uno al lado del otro, "Anterior" no
+            // cabía y se partía a mitad de palabra ("Ante-rior"), y con la
+            // letra al 200 % en tres trozos.
+            FilledButton.icon(
+              onPressed: _publicando ? null : (revisando ? _publicar : _siguiente),
+              icon: Icon(iconoPrincipal),
+              label: Text(textoPrincipal),
             ),
+            if (conAnterior) ...[
+              const SizedBox(height: Espacio.s),
+              OutlinedButton.icon(
+                onPressed: _publicando ? null : _atras,
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Anterior'),
+              ),
+            ],
           ],
         ),
       ),
@@ -462,7 +488,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(header: true, child: Text('Foto $numero', style: Theme.of(context).textTheme.titleSmall)),
+            Semantics(header: true, container: true, child: Text('Foto $numero', style: Theme.of(context).textTheme.titleSmall)),
             const SizedBox(height: Espacio.s),
             MarcoFoto(icono: foto.icono, alto: 120),
             const SizedBox(height: Espacio.m),
@@ -555,7 +581,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
               validador: _obligatorio('Escribe una descripción del material.'),
             ),
             const SizedBox(height: Espacio.l),
-            Semantics(header: true, child: Text('Categoría', style: Theme.of(context).textTheme.titleSmall)),
+            Semantics(header: true, container: true, child: Text('Categoría', style: Theme.of(context).textTheme.titleSmall)),
             const SizedBox(height: Espacio.s),
             Wrap(
               spacing: Espacio.s,
@@ -587,7 +613,7 @@ class _PantallaPublicarMaterialState extends State<PantallaPublicarMaterial> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Semantics(header: true, child: Text('Tipo de cesión', style: Theme.of(context).textTheme.titleSmall)),
+            Semantics(header: true, container: true, child: Text('Tipo de cesión', style: Theme.of(context).textTheme.titleSmall)),
             const SizedBox(height: Espacio.s),
             Wrap(
               spacing: Espacio.s,

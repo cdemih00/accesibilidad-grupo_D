@@ -5,6 +5,7 @@ import '../datos/modelos.dart';
 import '../navegacion/rutas.dart';
 import '../tema/colores.dart';
 import '../tema/tema.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/campo_texto.dart';
 import '../widgets/fila_dato.dart';
 
@@ -71,7 +72,7 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Chat con ${conversacion.con}')),
+      appBar: barraSuperior(context, 'Chat con ${conversacion.con}'),
       body: Column(
         children: [
           Expanded(
@@ -88,7 +89,7 @@ class _PantallaConversacionState extends State<PantallaConversacion> {
                   ),
                 for (final mensaje in conversacion.mensajes) _Burbuja(mensaje: mensaje, otraPersona: conversacion.con),
                 const SizedBox(height: Espacio.m),
-                Semantics(header: true, child: Text('Respuestas rápidas', style: textos.titleSmall)),
+                Semantics(header: true, container: true, child: Text('Respuestas rápidas', style: textos.titleSmall)),
                 const SizedBox(height: Espacio.s),
                 Wrap(
                   spacing: Espacio.s,

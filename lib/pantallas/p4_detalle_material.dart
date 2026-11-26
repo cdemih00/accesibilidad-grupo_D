@@ -7,6 +7,7 @@ import '../tema/colores.dart';
 import '../tema/tema.dart';
 import '../widgets/aviso.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/etiqueta_estado.dart';
 import '../widgets/fila_dato.dart';
 import '../widgets/foto_material.dart';
@@ -45,7 +46,7 @@ class PantallaDetalleMaterial extends StatelessWidget {
     final fotos = anuncio.fotos;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detalles del material')),
+      appBar: barraSuperior(context, 'Detalles del material'),
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -84,7 +85,7 @@ class PantallaDetalleMaterial extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
         children: [
-          Semantics(header: true, child: Text(anuncio.nombre, style: textos.titleMedium)),
+          Semantics(header: true, container: true, child: Text(anuncio.nombre, style: textos.titleMedium)),
           const SizedBox(height: Espacio.s),
           EtiquetaEstado(estado: anuncio.estado),
           const SizedBox(height: Espacio.l),
@@ -131,13 +132,20 @@ class _Apartado extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Espacio.l),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(header: true, child: Text(titulo, style: Theme.of(context).textTheme.titleMedium)),
-          const SizedBox(height: Espacio.s),
-          ...hijos,
-        ],
+      // Cada texto del apartado es un elemento propio y se lee después del
+      // título. Sin esto, TalkBack leía todo el apartado como un solo
+      // encabezado (lo vimos al sacar el orden de lectura, semana 5).
+      child: Semantics(
+        container: true,
+        explicitChildNodes: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(header: true, container: true, child: Text(titulo, style: Theme.of(context).textTheme.titleMedium)),
+            const SizedBox(height: Espacio.s),
+            ...hijos,
+          ],
+        ),
       ),
     );
   }

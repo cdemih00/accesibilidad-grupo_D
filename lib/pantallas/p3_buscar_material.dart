@@ -4,6 +4,7 @@ import '../datos/datos_app.dart';
 import '../datos/modelos.dart';
 import '../tema/tema.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/campo_texto.dart';
 import '../widgets/estado_vacio.dart';
 import '../widgets/tarjeta_anuncio.dart';
@@ -63,7 +64,7 @@ class _PantallaBuscarMaterialState extends State<PantallaBuscarMaterial> {
     final cuantos = resultados.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Buscar material')),
+      appBar: barraSuperior(context, 'Buscar material'),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.buscar),
       body: ListView(
         padding: const EdgeInsets.all(Espacio.m),
@@ -180,7 +181,7 @@ class _TituloFiltro extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: Espacio.m, bottom: Espacio.s),
-      child: Semantics(header: true, child: Text(texto, style: Theme.of(context).textTheme.titleSmall)),
+      child: Semantics(header: true, container: true, child: Text(texto, style: Theme.of(context).textTheme.titleSmall)),
     );
   }
 }

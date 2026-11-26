@@ -5,6 +5,7 @@ import '../datos/datos_app.dart';
 import '../navegacion/rutas.dart';
 import '../tema/colores.dart';
 import '../tema/tema.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/campo_texto.dart';
 import 'p1_crear_cuenta.dart';
 
@@ -45,7 +46,7 @@ class _PantallaIniciarSesionState extends State<PantallaIniciarSesion> {
     final textos = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Iniciar sesión')),
+      appBar: barraSuperior(context, 'Iniciar sesión'),
       body: SafeArea(
         child: AutofillGroup(
           child: Form(

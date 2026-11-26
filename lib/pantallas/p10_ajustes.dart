@@ -4,6 +4,7 @@ import '../datos/datos_app.dart';
 import '../navegacion/rutas.dart';
 import '../tema/tema.dart';
 import '../widgets/barra_opciones.dart';
+import '../widgets/barra_superior.dart';
 import '../widgets/dialogo_confirmar.dart';
 
 /// P10 · Ajustes: datos de la cuenta, avisos y cerrar sesión (salida del mapa
@@ -33,7 +34,7 @@ class PantallaAjustes extends StatelessWidget {
     final datos = DatosScope.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ajustes')),
+      appBar: barraSuperior(context, 'Ajustes'),
       bottomNavigationBar: const BarraOpciones(actual: SeccionBarra.inicio),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: Espacio.s),
@@ -97,7 +98,7 @@ class _Apartado extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(Espacio.m, Espacio.m, Espacio.m, Espacio.s),
-      child: Semantics(header: true, child: Text(titulo, style: Theme.of(context).textTheme.titleMedium)),
+      child: Semantics(header: true, container: true, child: Text(titulo, style: Theme.of(context).textTheme.titleMedium)),
     );
   }
 }

@@ -101,6 +101,18 @@ class CampoTexto extends StatelessWidget {
           ),
         );
 
+        final textoAyuda = (ayuda != null && mensajeError == null)
+            ? Padding(
+                padding: const EdgeInsets.only(top: Espacio.s),
+                child: Text(ayuda!, style: textos.bodySmall?.copyWith(color: ColoresApp.textoSecundario)),
+              )
+            : null;
+        // Sin botón al lado, la ayuda va dentro del mismo elemento que la
+        // etiqueta y el campo, para que TalkBack la lea con el campo y después
+        // de él. Al sacar el orden de lectura vimos que, fuera, se leía antes.
+        final ayudaDentro = alLado == null ? textoAyuda : null;
+        final ayudaFuera = alLado == null ? null : textoAyuda;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -116,6 +128,7 @@ class CampoTexto extends StatelessWidget {
                         Text(etiqueta, style: textos.labelMedium?.copyWith(color: ColoresApp.texto)),
                         const SizedBox(height: Espacio.s),
                         campo,
+                        ?ayudaDentro,
                       ],
                     ),
                   ),
@@ -123,12 +136,11 @@ class CampoTexto extends StatelessWidget {
                 if (alLado != null) ...[const SizedBox(width: Espacio.s), alLado!],
               ],
             ),
+            ?ayudaFuera,
+            // El error queda fuera para que TalkBack lo lea en cuanto aparece.
             if (mensajeError != null) ...[
               const SizedBox(height: Espacio.s),
               MensajeError(mensajeError),
-            ] else if (ayuda != null) ...[
-              const SizedBox(height: Espacio.s),
-              Text(ayuda!, style: textos.bodySmall?.copyWith(color: ColoresApp.textoSecundario)),
             ],
           ],
         );
